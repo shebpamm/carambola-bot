@@ -1,3 +1,8 @@
+#Config file to not leak info:
+config.json
+
+
+
 # Logs
 logs
 *.log
