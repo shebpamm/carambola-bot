@@ -1,0 +1,14 @@
+{
+  "name": "carambola-discord",
+  "version": "0.0.1",
+  "description": "A discord bot made mainly for organizing 10-man pugs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "shebpamm",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.2.0"
+  }
+}
