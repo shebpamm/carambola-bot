@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const requireAll = require('require-all');
 
-module.exports = client => {
+module.exports = (client, mongo) => {
 
   //Check if there are listeners bound, and if so then remove them.
   if(client.tracked_listeners) {
@@ -21,7 +21,7 @@ module.exports = client => {
   //Iterate all event callbacks and bind them to events by filename
   for (const name in eventFiles) {
     const event = eventFiles[name];  //Get reference to method from the string
-    bindedEvent = event.bind(null, client) //Create a binded function
+    bindedEvent = event.bind(null, client, mongo) //Create a binded function
     client.on(name, bindedEvent);
     client.tracked_listeners.push([name, bindedEvent]); //Track the listener function so we can remove it on reload
 

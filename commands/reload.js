@@ -2,7 +2,14 @@ const path = require('path');
 const eventLoader = require(path.join(__basedir, 'utils/eventLoader.js'));
 const commandLoader = require(path.join(__basedir, 'utils/commandLoader.js'));
 
-module.exports.execute = async (client, message, args) => {
+module.exports.execute = async (client, message, args, guildDocument) => {
+
+  for (const path in require.cache) {
+      if (path.endsWith('.js') && path.includes('events')) { // only clear *.js, not *.node
+        delete require.cache[path]
+      }
+    }
+
   if(args.length == 0) { //If no argument is given, reload both events and commands.
     eventLoader(client);
     commandLoader(client);

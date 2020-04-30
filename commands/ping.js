@@ -1,4 +1,4 @@
-module.exports.execute = async (client, message, args) => {
+module.exports.execute = async (client, message, args, guildDocument) => {
   message.reply("Pong!")
 }
 
