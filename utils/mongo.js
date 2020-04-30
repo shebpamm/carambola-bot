@@ -24,7 +24,7 @@ const guildSchema = new mongoose.Schema({
     customPrefix: String,
     pugs: {
       pugChannelID: String,
-      pugUserRole: String
+      pugUserRoleID: String
     }
   }
 
