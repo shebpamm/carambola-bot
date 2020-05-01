@@ -10,10 +10,10 @@ module.exports.execute = async (client, message, args, guildDocument) => {
         else message.channel.send('No pug role assigned.\nAssign one with:\n`pug config role @<role>`')
       }
       if(["channel", "feed"].includes(args[0])) {
-        //Go through channels in cache and find one with matching id and a channel type of text.
-        let currentChannel = await message.guild.channels.cache.find(channel => (channel.id === guildDocument.config.pugs.pugChannelID && channel.type === 'text'));
+        //Try to resolve current channel.
+        let currentChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
         //If found, send message. Otherwise print no pug channel.
-        if(currentChannel.id) message.channel.send(`Currently assigned pug channel: **${currentChannel.name}**`, {allowedMentions: {'parse' : [] }})
+        if(currentChannel) message.channel.send(`Currently assigned pug channel: **${currentChannel.name}**`, {allowedMentions: {'parse' : [] }})
         else message.channel.send('No pug channel assigned.\nAssign one with:\n`pug config channel #<channel>`')
       }
 
