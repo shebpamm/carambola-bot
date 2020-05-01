@@ -9,11 +9,11 @@ const createPugQueryMessageEmbed = async (message, guildDocument) => {
   pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
   const queryEmbed = {
     color: 0x00ffff,
-    title: `${message.author.username} is interested in playing a 5v5!`,
+    title: `${message.author.username} is interested in doing a 5v5!`,
     description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
     fields: [
       {
-        name:"Players:", value:"0/10"
+        name:"Player count:", value:"0/10"
       }
     ]
   }
@@ -24,18 +24,21 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
   pugRole = await embedMessage.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || "");
   pugChannel = await embedMessage.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
   const queryEmbedTemplate = {
-    color: 0x00ffff,
-    title: `${embedMessage.author.username} is interested in playing a 5v5!`,
+    color: 0xffca26,
+    title: `${embedMessage.author.username} is interested in doing a 5v5!`,
     description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
     fields: [
       {
-        name:"Players:", value: `${guildDocument.pugs.pugQuery.interestedPlayersCount}/10`
+        name:"Player count:", value: `${guildDocument.pugs.pugQuery.interestedPlayersCount}/10`
+      },
+      {
+        name:`Players (${Math.min(guildDocument.pugs.pugQuery.interestedPlayersCount, 10)}/10):`, value: '\u200b' + guildDocument.pugs.pugQuery.interestedPlayers.map(p => p.username).join('\n')
       }
     ]
   }
 
   queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
-  queryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
+  //queryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
 
   return embedMessage.edit(queryEmbed)
 }
