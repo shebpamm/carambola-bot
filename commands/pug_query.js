@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 const isConfigured = (guildDocument, msg) => { //Check if proper roles and channel have been assigned.
   return msg.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || "") && msg.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
 }
@@ -7,26 +9,59 @@ const createPugQueryMessageEmbed = async (message, guildDocument) => {
   pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
   const queryEmbed = {
     color: 0x00ffff,
-    title: `${message.author.name} is interested in playing a 5v5!`,
-    description: `If you're interested, react with :thumbsup: below! ${pugRole}`
+    title: `${message.author.username} is interested in playing a 5v5!`,
+    description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
+    fields: [
+      {
+        name:"Players:", value:"0/10"
+      }
+    ]
   }
-
   return pugChannel.send({embed: queryEmbed, })
 }
 
-const reactionCollectorFilter = (reaction, user) => {
-  return reaction.emoji.name === '👍'; //Is a thumbsup, cant see it on my os lol.
+const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
+  pugRole = await embedMessage.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || "");
+  pugChannel = await embedMessage.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+  const queryEmbedTemplate = {
+    color: 0x00ffff,
+    title: `${embedMessage.author.username} is interested in playing a 5v5!`,
+    description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
+    fields: [
+      {
+        name:"Players:", value: `${guildDocument.pugs.pugQuery.interestedPlayersCount}/10`
+      }
+    ]
+  }
+
+  queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
+  queryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
+
+  return embedMessage.edit(queryEmbed)
 }
 
-const createPugQueryReactionCollector = queryMessage => {
-  const collector = queryMessage.createReactionCollector(reactionCollectorFilter);
-  collector.on('collect',(reaction, user) => { //Whenever someone reacts.
-    console.log(`${user.tag} reacted!`)
-  });
+const reactionCollectorFilter = (reaction, user) => {
+  return reaction.emoji.name === '👍' && !user.bot; //Is a thumbsup, cant see it on my os lol.
+}
 
-  collector.on('dispose',(reaction, user) => { //Whenever someone candels their reaction.
-    console.log(`${user.tag} un-reacted!`)
-  });
+const onQueryReactionCollect = (guildDocument, reaction, user) => {
+  console.log(`${user.tag} reacted! ${reaction.message}`)
+  guildDocument.addInterestedPlayer(user).then(() => {
+    updatePugQueryMessageEmbed(reaction.message, guildDocument);
+  })
+}
+
+const onQueryReactionRemove = (guildDocument, reaction, user) => {
+  console.log(`${user.tag} un-reacted!`)
+  guildDocument.removeInterestedPlayer(user).then(() => {
+    updatePugQueryMessageEmbed(reaction.message, guildDocument);
+  })
+}
+
+const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
+  const collector = queryMessage.createReactionCollector(reactionCollectorFilter, {dispose: true});
+  collector.on('collect', onQueryReactionCollect.bind(null, guildDocument))
+  collector.on('remove', onQueryReactionRemove.bind(null, guildDocument))
 }
 
 module.exports.execute = async (client, message, args, guildDocument) => {
@@ -43,10 +78,14 @@ module.exports.execute = async (client, message, args, guildDocument) => {
         message.channel.send('There is already a pug query active.\nYou can cancel it with `pug query cancel`');
       } else { // TODO: Going to be more active steps to check for.
         if(isConfigured(guildDocument, message)) { //Check if the bot has been given a proper channel to post in and a role to mention.
+
+          guildDocument.pugs.lastCreatedAt = undefined;
+
           createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { //Create a new embed and send it.
             message.guild.pugQueryMessage = queryMessage;
             queryMessage.react('👍').then(queryMessageReaction => {
-              message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage); //Create a reaction collector after the message has been sent.
+              //Create a reaction collector after the message has been sent.
+              message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
             })
           })
           guildDocument.pugs.pugQueryActive = true;
@@ -58,7 +97,9 @@ module.exports.execute = async (client, message, args, guildDocument) => {
     }
     if(['cancel', 'cc'].includes(args[0])) {
       if(guildDocument.pugs.pugQueryActive) {
-        guildDocument.pugs.pugQueryActive = false
+        guildDocument.pugs.pugQuery.interestedPlayersCount = 0;
+        guildDocument.pugs.pugQuery.interestedPlayers = [];
+        guildDocument.pugs.pugQueryActive = false;
         guildDocument.save()
         message.channel.send("Query cancelled.")
       } else {
