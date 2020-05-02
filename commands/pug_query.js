@@ -32,7 +32,14 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
         name:"Player count:", value: `${guildDocument.pugs.pugQuery.interestedPlayersCount}/10`
       },
       {
-        name:`Players (${Math.min(guildDocument.pugs.pugQuery.interestedPlayersCount, 10)}/10):`, value: '\u200b' + guildDocument.pugs.pugQuery.interestedPlayers.map(p => p.username).join('\n')
+        name:`Players (${Math.min(guildDocument.pugs.pugQuery.interestedPlayersCount, 10)}/10):`,
+        value: '\u200b' + guildDocument.pugs.pugQuery.interestedPlayers.slice(0, 10).map(p => p.username).join('\n'),
+        inline: true
+      },
+      {
+        name:`Reserve players:`,
+        value: '\u200b' + guildDocument.pugs.pugQuery.interestedPlayers.slice(11).map(p => p.username).join('\n'),
+        inline: true
       }
     ]
   }
