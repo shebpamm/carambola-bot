@@ -5,6 +5,18 @@ module.exports = async (client, mongo, msg) => {
   if(msg.author.bot) return; //If message author is a bot, ignore.
 
   guildDocument = await mongo.Guild.findOne({guildID: msg.guild.id}); //Find mongoose document with guild data.
+
+  if(!guildDocument) { //If no guildDocument is found.
+
+    //Code is just from guildCreate
+    // TODO: Refactor both this and guildCreate to use same method.
+    let document = await mongo.Guild.findOneAndUpdate(
+      {guildID: msg.guild.id}, {guildName: msg.guild.name},
+      {upsert: true, new: true, setDefaultsOnInsert: true})
+
+    document.save()
+  }
+
   usedPrefix = guildDocument.config.customPrefix || config.commandPrefix; //Check if we have a custom prefix assigned for the server.
 
   //Use different methods to compare depending if config has prefixCaseSensitive set or not.
