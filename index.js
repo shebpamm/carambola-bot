@@ -12,8 +12,6 @@ mongo.init();
 const client = new Discord.Client();
 const config = require('./config.json')
 
-
-
 eventLoader(client, mongo); //Fetch all eventHandlers in events/ folder.
 commandLoader(client); //Fetch all commandHandlers in events/ folder.
 
