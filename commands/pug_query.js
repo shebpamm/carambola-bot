@@ -8,8 +8,8 @@ const createPugQueryMessageEmbed = async (message, guildDocument) => {
   pugRole = await message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || "");
   pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
   const queryEmbed = {
-    color: 0x00ffff,
-    title: `${message.author.username} is interested in doing a 5v5!`,
+    color: 0xffca26,
+    title: `${message.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
     description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
     fields: [
       {
@@ -25,7 +25,7 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
   pugChannel = await embedMessage.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
   const queryEmbedTemplate = {
     color: 0xffca26,
-    title: `${embedMessage.author.username} is interested in doing a 5v5!`,
+    title: `${embedMessage.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
     description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
     fields: [
       {
@@ -83,6 +83,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
         if(isConfigured(guildDocument, message)) { //Check if the bot has been given a proper channel to post in and a role to mention.
 
           guildDocument.pugs.lastCreatedAt = undefined;
+
+          message.guild.pugQueryAuthor = message.author;
 
           createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { //Create a new embed and send it.
             message.guild.pugQueryMessage = queryMessage;
