@@ -1,0 +1,6 @@
+{
+  "botUserToken" : "<bot user token>",
+  "commandPrefix" : "C!",
+  "prefixCaseSensitive" : false,
+  "developerID" : "<your discord userid>"
+}
