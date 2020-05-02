@@ -15,6 +15,7 @@ module.exports = async (client, mongo, msg) => {
       {upsert: true, new: true, setDefaultsOnInsert: true})
 
     document.save()
+    guildDocument = document;
   }
 
   usedPrefix = guildDocument.config.customPrefix || config.commandPrefix; //Check if we have a custom prefix assigned for the server.
