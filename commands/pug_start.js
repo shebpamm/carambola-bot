@@ -14,16 +14,33 @@ const onVoiceStateUpdate = (guild, guildDocument, oldState, newState) => {
   }
 }
 
+const capFilter = response => {
+  return response.mentions.users.size === 2 && response.author.id === response.guild.pugQueryAuthor.id;
+}
+
 const startCaptainSelect = (guild, guildDocument) => {
   guildDocument.pugs.pugStates.pugLobbyJoinActive = false;
   guildDocument.pugs.pugStates.pugCaptainPickActive = true;
+
+  guild.pugChannel.send(`${guild.pugQueryAuthor} please mention two players to select as captains.`)
+  guild.pugChannel.awaitMessages(capFilter, { max: 1, }).then(c => {
+    guildDocument.pugs.teams.1.captain = c.mentions.users.first();
+    guildDocument.pugs.teams.1.players.push(c.mentions.users.first());
+
+    guildDocument.pugs.teams.2.captain = c.mentions.users.last();
+    guildDocument.pugs.teams.2.players.push(c.mentions.users.last());
+
+    guildDocument.save()
+  })
 }
 
 // TODO: Jesus refactor this sometime. Definitely.
 module.exports.execute = async (client, message, args, guildDocument) => {
   if(guildDocument.pugs.pugStates.pugQueryActive) {
     let pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+    message.guild.pugChannel = pugChannel;
     message.guild.movedPugPlayers = []
+
     if(guildDocument.pugs.pugQuery.interestedPlayersCount >= guildDocument.pugs.pugQuery.targetPlayerCount || args.includes('force')) {
 
       //Pug querying is now stopped as the next stage starts.
@@ -53,6 +70,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
       }
       //make a list of people missing by eliminating all players that have been moved.
       message.guild.missingPlayers = message.guild.pugPlayers.filter(p => !message.guild.movedPugPlayers.map(c => c.id).includes(p.id));
+
 
       if(message.guild.missingPlayers.length === 0) {
         pugChannel.send('Created a new lobby and moved everyone.');

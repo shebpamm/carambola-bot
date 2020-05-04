@@ -17,6 +17,16 @@ const guildSchema = new mongoose.Schema({
       pugTeamSelectActive: {type: Boolean, default: false},
       pugMapSelectActive: {type: Boolean, default: false}
     },
+    teams: {
+      1: {
+        captain: {id: String, username: String},
+        players: [{id: String, username: String}],
+      },
+      2: {
+        captain: {id: String, username: String},
+        players: [{id: String, username: String}],
+      }
+    }
     pugQuery: {
       lastCreatedAt: {type: Date, defualt: Date.now },
       interestedPlayersCount: {type: Number, default: 0},
