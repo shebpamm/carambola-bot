@@ -15,6 +15,6 @@ const config = require('./config.json')
 eventLoader(client, mongo); //Fetch all eventHandlers in events/ folder.
 commandLoader(client); //Fetch all commandHandlers in events/ folder.
 
-client.setMaxListeners(1); //Get a warning if there are more than 1 listeners on events at any time.
+client.setMaxListeners(5); //Get a warning if there are more than 1 listeners on events at any time.
 
 client.login(config.botUserToken)
