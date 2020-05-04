@@ -18,9 +18,13 @@ const capFilter = response => {
   return response.mentions.users.size === 2 && response.author.id === response.guild.pugQueryAuthor.id;
 }
 
+const areMentionsTeamless= (message) => {
+  return message.mentions.users.every(u => message.guild.teamlessPlayers.map(p => p.id).includes(u.id));
+}
+
 const teamFilter = response => {
-  if(response.guild.teamPickStep === 0) return response.mentions.users.size === 1 && response.author.id === response.guild.choosingCaptain.id
-  return response.mentions.users.size === 2 && response.author.id === response.guild.choosingCaptain.id
+  if(response.guild.teamPickStep === 0 || response.guild.teamlessPlayers.length === 1) return response.mentions.users.size === 1 && response.author.id === response.guild.choosingCaptain.id && areMentionsTeamless(response);
+  return response.mentions.users.size === 2 && response.author.id === response.guild.choosingCaptain.id && areMentionsTeamless(response);
 }
 
 const startCaptainSelect = async (guild, guildDocument) => {
@@ -41,15 +45,60 @@ const startCaptainSelect = async (guild, guildDocument) => {
         doTeamPicks(guild, guildDocument);
       })
     })
-
-
   })
 }
 
 module.exports.startCaptainSelect = startCaptainSelect;
 
+const startMapVeto = async (guild, guildDocument) => {
+  guildDocument.pugs.pugStates.pugTeamPickActive = false;
+  guildDocument.pugs.pugStates.pugMapSelectActive = true;
+}
+
 const updateTeamPickEmbed = (guild, guildDocument, message) => {
-  console.log("Cap pic, ", message.author);
+  guildDocument.addToTeam(guild.choosingTeam, message.mentions.users)
+  guild.teamPickStep++;
+
+  if(guild.choosingTeam === 1) {
+    guild.choosingTeam = 2
+    guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.two.captain.id).user;
+  } else {
+    guild.choosingTeam = 1
+    guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.one.captain.id).user;
+  }
+
+  guild.teamlessPlayers = getTeamlessPlayers(guild, guildDocument);
+
+  const queryEmbedTemplate = {
+    color: 0xffca26,
+    title: `**${guild.choosingCaptain.username}** is choosing`,
+    description: `Please mention ${(guild.teamPickStep === 0 || guild.teamlessPlayers.length === 1) ? 1 : 2} in a message to choose them.`,
+    fields: [
+      {
+        name:"Team 1",
+        value: '\u200b' + guildDocument.pugs.teams.one.players.map(p => p.username).join('\n'),
+        inline: true
+      },
+      {
+        name:`Players`,
+        value: '\u200b' + guild.teamlessPlayers.map(p => p.user.username).join('\n'),
+        inline: true
+      },
+      {
+        name:`Team 2`,
+        value: '\u200b' + guildDocument.pugs.teams.two.players.map(p => p.username).join('\n'),
+        inline: true
+      }
+    ]
+  }
+
+  if(guild.teamlessPlayers.length === 0) {
+    guild.teamPickCollector.removeListener('collect', guild.teamPickCollectorListener);
+    guild.teamPickCollector.stop();
+    startMapVeto(guild, guildDocument);
+  }
+
+  return guild.teamPickEmbed.edit({embed: queryEmbedTemplate});
 }
 
 const createTeamPickEmbed = (guild, guildDocument) => {
@@ -65,9 +114,7 @@ const createTeamPickEmbed = (guild, guildDocument) => {
       },
       {
         name:`Players`,
-        value: '\u200b' + guild.pugPlayers
-        .filter(p => !guildDocument.pugs.teams.one.players.map(c => c.id).includes(p.user.id) && !guildDocument.pugs.teams.two.players.map(c => c.id).includes(p.user.id))
-        .map(p => p.user.username).join('\n'),
+        value: '\u200b' + guild.teamlessPlayers.map(p => p.user.username).join('\n'),
         inline: true
       },
       {
@@ -81,6 +128,12 @@ const createTeamPickEmbed = (guild, guildDocument) => {
   return guild.pugChannel.send({embed: queryEmbedTemplate});
 }
 
+const getTeamlessPlayers = (guild, guildDocument) => {
+  return guild.pugPlayers
+  .filter(p => !guildDocument.pugs.teams.one.players.map(c => c.id)
+  .includes(p.user.id) && !guildDocument.pugs.teams.two.players.map(c => c.id).includes(p.user.id))
+}
+
 const doTeamPicks = (guild, guildDocument) => {
   guildDocument.pugs.pugStates.pugCaptainPickActive = false;
   guildDocument.pugs.pugStates.pugTeamPickActive = true;
@@ -88,6 +141,9 @@ const doTeamPicks = (guild, guildDocument) => {
   guildDocument.save();
 
   guild.teamPickStep = 0;
+
+  guild.teamlessPlayers = getTeamlessPlayers(guild, guildDocument);
+
 
   createTeamPickEmbed(guild, guildDocument).then(pickEmbed => {
     guild.teamPickEmbed = pickEmbed;
