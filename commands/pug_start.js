@@ -18,19 +18,82 @@ const capFilter = response => {
   return response.mentions.users.size === 2 && response.author.id === response.guild.pugQueryAuthor.id;
 }
 
-const startCaptainSelect = (guild, guildDocument) => {
+const teamFilter = response => {
+  if(response.guild.teamPickStep === 0) return response.mentions.users.size === 1 && response.author.id === response.guild.choosingCaptain.id
+  return response.mentions.users.size === 2 && response.author.id === response.guild.choosingCaptain.id
+}
+
+const startCaptainSelect = async (guild, guildDocument) => {
   guildDocument.pugs.pugStates.pugLobbyJoinActive = false;
   guildDocument.pugs.pugStates.pugCaptainPickActive = true;
 
+  await guildDocument.clearTeams();
+
   guild.pugChannel.send(`${guild.pugQueryAuthor} please mention two players to select as captains.`)
-  guild.pugChannel.awaitMessages(capFilter, { max: 1, }).then(c => {
-    guildDocument.pugs.teams.1.captain = c.mentions.users.first();
-    guildDocument.pugs.teams.1.players.push(c.mentions.users.first());
+  guild.pugChannel.awaitMessages(capFilter, { max: 1 }).then(c => {
 
-    guildDocument.pugs.teams.2.captain = c.mentions.users.last();
-    guildDocument.pugs.teams.2.players.push(c.mentions.users.last());
+    //C contains all messages collected by MessageCollector,
+    //we have { max: 1 } so only one message is collected
+    guildDocument.setCaptain(1, c.first().mentions.users.first()).then(() => {
+      guildDocument.setCaptain(2, c.first().mentions.users.last()).then(() => {
+        guild.choosingCaptain = c.first().mentions.users.first();
+        guild.choosingTeam = 1;
+        doTeamPicks(guild, guildDocument);
+      })
+    })
 
-    guildDocument.save()
+
+  })
+}
+
+module.exports.startCaptainSelect = startCaptainSelect;
+
+const updateTeamPickEmbed = (guild, guildDocument, message) => {
+  console.log("Cap pic, ", message.author);
+}
+
+const createTeamPickEmbed = (guild, guildDocument) => {
+  const queryEmbedTemplate = {
+    color: 0xffca26,
+    title: `**${guild.choosingCaptain.username}** is choosing`,
+    description: ``,
+    fields: [
+      {
+        name:"Team 1",
+        value: '\u200b' + guildDocument.pugs.teams.one.players.map(p => p.username).join('\n'),
+        inline: true
+      },
+      {
+        name:`Players`,
+        value: '\u200b' + guild.pugPlayers
+        .filter(p => !guildDocument.pugs.teams.one.players.map(c => c.id).includes(p.user.id) && !guildDocument.pugs.teams.two.players.map(c => c.id).includes(p.user.id))
+        .map(p => p.user.username).join('\n'),
+        inline: true
+      },
+      {
+        name:`Team 2`,
+        value: '\u200b' + guildDocument.pugs.teams.two.players.map(p => p.username).join('\n'),
+        inline: true
+      }
+    ]
+  }
+
+  return guild.pugChannel.send({embed: queryEmbedTemplate});
+}
+
+const doTeamPicks = (guild, guildDocument) => {
+  guildDocument.pugs.pugStates.pugCaptainPickActive = false;
+  guildDocument.pugs.pugStates.pugTeamPickActive = true;
+
+  guildDocument.save();
+
+  guild.teamPickStep = 0;
+
+  createTeamPickEmbed(guild, guildDocument).then(pickEmbed => {
+    guild.teamPickEmbed = pickEmbed;
+    guild.teamPickCollectorListener = updateTeamPickEmbed.bind(null, guild, guildDocument);
+    guild.teamPickCollector = guild.pugChannel.createMessageCollector(teamFilter, {max: guildDocument.pugs.pugQuery.targetPlayerCount});
+    guild.teamPickCollector.on('collect', guild.teamPickCollectorListener);
   })
 }
 
