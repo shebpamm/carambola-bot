@@ -1,0 +1,38 @@
+{
+  "all_maps": [
+    "de_cache",
+    "de_dust2",
+    "de_mirage",
+    "de_overpass",
+    "de_nuke",
+    "de_inferno",
+    "de_train",
+    "de_cbble",
+    "cs_office",
+    "de_vertigo",
+    "de_anubis",
+    "de_chlorine"
+  ],
+  "all_de_maps": [
+    "de_cache",
+    "de_dust2",
+    "de_mirage",
+    "de_overpass",
+    "de_nuke",
+    "de_inferno",
+    "de_train",
+    "de_cbble",
+    "de_vertigo",
+    "de_anubis",
+    "de_chlorine"
+  ],
+  "active_duty": [
+    "de_dust2",
+    "de_mirage",
+    "de_overpass",
+    "de_nuke",
+    "de_inferno",
+    "de_train",
+    "de_vertigo"
+  ]
+}
