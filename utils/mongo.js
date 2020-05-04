@@ -51,6 +51,12 @@ guildSchema.methods.removeInterestedPlayer = function(user) {
   return this.save()
 };
 
+guildSchema.methods.clearInterestedPlayers = function() {
+  this.pugs.pugQuery.interestedPlayersCount = 0;
+  this.pugs.pugQuery.interestedPlayers = [];
+  return this.save()
+};
+
 module.exports.Guild = mongoose.model('Guild', guildSchema);
 
 //Initialize a connection to the Mongo database and return a promise that resolves after the connection opens.

@@ -90,6 +90,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
         if(isConfigured(guildDocument, message)) { //Check if the bot has been given a proper channel to post in and a role to mention.
 
           guildDocument.pugs.lastCreatedAt = undefined;
+          await guildDocument.clearInterestedPlayers();
 
           message.guild.pugQueryAuthor = message.author;
 
