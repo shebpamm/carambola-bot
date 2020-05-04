@@ -1,6 +1,7 @@
 module.exports.execute = async (client, message, args, guildDocument) => {
   if(args[0] == 'query') {
-    guildDocument.addInterestedPlayer(message.mentions.users.first());
+    players = message.mentions.users.map(user => {return {id: user.id, username: user.username}})
+    for (player of players) await guildDocument.addInterestedPlayer(player);
   }
 }
 
