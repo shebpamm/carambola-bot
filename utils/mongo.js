@@ -18,15 +18,15 @@ const guildSchema = new mongoose.Schema({
       pugMapSelectActive: {type: Boolean, default: false}
     },
     teams: {
-      1: {
+      one: {
         captain: {id: String, username: String},
         players: [{id: String, username: String}],
       },
-      2: {
+      two: {
         captain: {id: String, username: String},
         players: [{id: String, username: String}],
       }
-    }
+    },
     pugQuery: {
       lastCreatedAt: {type: Date, defualt: Date.now },
       interestedPlayersCount: {type: Number, default: 0},
@@ -66,6 +66,33 @@ guildSchema.methods.clearInterestedPlayers = function() {
   this.pugs.pugQuery.interestedPlayers = [];
   return this.save()
 };
+
+guildSchema.methods.setCaptain = function(team, user) {
+  if(team === 1) {
+    this.pugs.teams.one.captain = {id: user.id, username: user.username};
+    return this.addToTeam(team, [user]);
+  }
+  if(team === 2) {
+    this.pugs.teams.two.captain = {id: user.id, username: user.username};
+    return this.addToTeam(team, [user]);
+  }
+}
+
+guildSchema.methods.addToTeam = function(team, users) {
+  if(team === 1) {
+    this.pugs.teams.one.players.push(...users.map(user => {return {id: user.id, username: user.username}}));
+  }
+  if(team === 2) {
+    this.pugs.teams.two.players.push(...users.map(user => {return {id: user.id, username: user.username}}));
+  }
+
+  return this.save()
+}
+
+guildSchema.methods.clearTeams = function() {
+  this.pugs.teams.one.players = [];
+  this.pugs.teams.two.players = [];
+}
 
 module.exports.Guild = mongoose.model('Guild', guildSchema);
 
