@@ -10,7 +10,13 @@ const guildSchema = new mongoose.Schema({
 
   //Properties for organizing pugs
   pugs: {
-    pugQueryActive: {type: Boolean, default: false},
+    pugStates: {
+      pugQueryActive: {type: Boolean, default: false},
+      pugLobbyJoinActive: {type: Boolean, default: false},
+      pugCaptainPickActive: {type: Boolean, default: false},
+      pugTeamSelectActive: {type: Boolean, default: false},
+      pugMapSelectActive: {type: Boolean, default: false}
+    },
     pugQuery: {
       lastCreatedAt: {type: Date, defualt: Date.now },
       interestedPlayersCount: {type: Number, default: 0},

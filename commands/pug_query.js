@@ -76,7 +76,7 @@ const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
 
 module.exports.execute = async (client, message, args, guildDocument) => {
   if(args.length === 0) {
-    if(guildDocument.pugs.pugQueryActive) {
+    if(guildDocument.pugs.pugStates.pugQueryActive) {
       message.channel.send(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`)
     } else {
       message.channel.send("There isn't a query running right now.\n Start one with the command: `pug query new`");
@@ -84,7 +84,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
   }
   if(args.length === 1) {
     if(['new', 'start', 'go'].includes(args[0])) {
-      if(guildDocument.pugs.pugQueryActive) {
+      if(guildDocument.pugs.pugStates.pugQueryActive) {
         message.channel.send('There is already a pug query active.\nYou can cancel it with `pug query cancel`');
       } else { // TODO: Going to be more active steps to check for.
         if(isConfigured(guildDocument, message)) { //Check if the bot has been given a proper channel to post in and a role to mention.
@@ -100,7 +100,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
               message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
             })
           })
-          guildDocument.pugs.pugQueryActive = true;
+          guildDocument.pugs.pugStates.pugQueryActive = true;
           guildDocument.save()
         } else {
           message.channel.send('Please give the bot a role to mention and a channel to post in:```pug config role @<role>\npug config channel #<channel>```')
@@ -108,10 +108,10 @@ module.exports.execute = async (client, message, args, guildDocument) => {
       }
     }
     if(['cancel', 'cc'].includes(args[0])) {
-      if(guildDocument.pugs.pugQueryActive) {
+      if(guildDocument.pugs.pugStates.pugQueryActive) {
         guildDocument.pugs.pugQuery.interestedPlayersCount = 0;
         guildDocument.pugs.pugQuery.interestedPlayers = [];
-        guildDocument.pugs.pugQueryActive = false;
+        guildDocument.pugs.pugStates.pugQueryActive = false;
         guildDocument.save()
         message.channel.send("Query cancelled.")
       } else {
