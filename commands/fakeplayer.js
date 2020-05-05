@@ -12,6 +12,6 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'fakeplayer',
 	category: 'developer',
-	category_aliases: ['dev', 'd'],
-	command_aliases: ['fp']
+	categoryAliases: ['dev', 'd'],
+	commandAliases: ['fp']
 };

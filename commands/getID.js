@@ -5,6 +5,6 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'getID',
 	category: 'developer',
-	category_aliases: ['dev', 'd'],
-	command_aliases: ['userID']
+	categoryAliases: ['dev', 'd'],
+	commandAliases: ['userID']
 };

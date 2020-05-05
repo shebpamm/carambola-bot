@@ -33,7 +33,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 
 module.exports.config = {
 	category: 'developer',
-	category_aliases: ['dev', 'd'],
+	categoryAliases: ['dev', 'd'],
 	name: 'reload',
-	command_aliases: ['r', 'restart']
+	commandAliases: ['r', 'restart']
 };

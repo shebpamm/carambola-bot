@@ -43,8 +43,6 @@ const guildSchema = new mongoose.Schema({
 			pugUserRoleID: String
 		}
 	}
-
-	// TODO: Permissions?
 }, {minimize: true});
 
 // Adds players to the array and keeps track of the count.
@@ -57,7 +55,7 @@ guildSchema.methods.addInterestedPlayer = function (user) {
 // Removes players from the array and keeps track of the count.
 guildSchema.methods.removeInterestedPlayer = function (user) {
 	this.pugs.pugQuery.interestedPlayersCount--;
-	this.pugs.pugQuery.interestedPlayers = this.pugs.pugQuery.interestedPlayers.filter(u => u.id != user.id); // A bit ugly but the array is never going to be big :shrug:
+	this.pugs.pugQuery.interestedPlayers = this.pugs.pugQuery.interestedPlayers.filter(u => u.id !== user.id); // A bit ugly but the array is never going to be big :shrug:
 	return this.save();
 };
 

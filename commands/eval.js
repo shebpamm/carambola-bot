@@ -24,6 +24,6 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'eval',
 	category: 'developer',
-	category_aliases: ['dev', 'd'],
-	command_aliases: ['ev']
+	categoryAliases: ['dev', 'd'],
+	commandAliases: ['ev']
 };

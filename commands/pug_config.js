@@ -48,6 +48,6 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'config',
 	category: 'pug',
-	category_aliases: ['scrim', 'cs', 'csgo'],
-	command_aliases: ['cfg']
+	categoryAliases: ['scrim', 'cs', 'csgo'],
+	commandAliases: ['cfg']
 };

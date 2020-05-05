@@ -5,6 +5,6 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'ping',
 	category: 'developer',
-	category_aliases: ['dev', 'd'],
-	command_aliases: ['p']
+	categoryAliases: ['dev', 'd'],
+	commandAliases: ['p']
 };

@@ -15,5 +15,18 @@
   },
   "devDependencies": {
     "xo": "^0.30.0"
+  },
+  "xo": {
+    "rules": {
+      "unicorn/filename-case": [
+        "error",
+        {
+          "cases": {
+            "camelCase": true,
+            "kebabCase": true
+          }
+        }
+       ]
+    }
   }
 }

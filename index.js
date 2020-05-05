@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 
 global.__basedir = __dirname; // Points to root directory, so that modules can load config.json from anywhere.
 
-const requireAll = require('require-all');
 const eventLoader = require('./utils/eventLoader.js');
 const commandLoader = require('./utils/commandLoader.js');
 const mongo = require('./utils/mongo.js');

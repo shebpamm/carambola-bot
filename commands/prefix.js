@@ -14,6 +14,6 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'prefix',
 	category: 'config',
-	category_aliases: ['cfg'],
-	command_aliases: ['pfx']
+	categoryAliases: ['cfg'],
+	commandAliases: ['pfx']
 };

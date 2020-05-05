@@ -33,16 +33,16 @@ module.exports = async (client, mongo, message) => {
 		const [catg, cmd, ...args] = message.content.trim().slice(usedPrefix.length).trim().split(/\s+/g); // Split command into an array.
 
 		// Check if category is valid:
-		const resolvedCatg = client.categories[catg] || client.categories[client.category_aliases.get(catg)];
+		const resolvedCatg = client.categories[catg] || client.categories[client.categoryAliases.get(catg)];
 
 		if (resolvedCatg) {
 			// Check if a key exists in commands or aliases and get the value(the method) from that.
-			const resolvedCommand = resolvedCatg.commands.get(cmd.toLowerCase()) || resolvedCatg.commands.get(resolvedCatg.command_aliases.get(cmd.toLowerCase()));
+			const resolvedCommand = resolvedCatg.commands.get(cmd.toLowerCase()) || resolvedCatg.commands.get(resolvedCatg.commandAliases.get(cmd.toLowerCase()));
 
 			if (resolvedCommand) { // Found a command
 				// Check if command is case sensitive, and if so return if it doesn't match.
 				if (resolvedCommand.config.case_sensitive || false) {
-					if (!(cmd in [resolvedCommand.config.name, ...resolvedCommand.config.command_aliases])) {
+					if (!(cmd in [resolvedCommand.config.name, ...resolvedCommand.config.commandAliases])) {
 						return;
 					}
 				}
