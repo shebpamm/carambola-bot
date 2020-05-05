@@ -12,5 +12,8 @@
     "discord.js": "^12.2.0",
     "mongoose": "^5.9.10",
     "require-all": "^3.0.0"
+  },
+  "devDependencies": {
+    "xo": "^0.30.0"
   }
 }
