@@ -1,5 +1,12 @@
+const path = require('path');
+const maps = require(path.join(__basedir, 'maps.json'));
+
 const createPugLobby = (message, guildDocument) => {
   return message.guild.channels.create('Scrim Lobby', { topic: 'Carambola', type: 'voice'})
+}
+
+const createVoiceChannel = (guild, name) => {
+  return guild.channels.create(name, { topic: 'Carambola', type: 'voice'})
 }
 
 const onVoiceStateUpdate = (guild, guildDocument, oldState, newState) => {
@@ -27,6 +34,14 @@ const teamFilter = response => {
   return response.mentions.users.size === 2 && response.author.id === response.guild.choosingCaptain.id && areMentionsTeamless(response);
 }
 
+const mapPoolFilter = response => {
+  return response.author.id === response.guild.pugQueryAuthor.id && Object.keys(maps).includes(response.content.trim().replace(' ', '_'));
+}
+
+const mapVetoFilter = response => {
+  return response.author.id === response.guild.choosingCaptain.id && response.guild.availableMaps.includes(response.content.trim().replace(' ', '_'));
+}
+
 const startCaptainSelect = async (guild, guildDocument) => {
   guildDocument.pugs.pugStates.pugLobbyJoinActive = false;
   guildDocument.pugs.pugStates.pugCaptainPickActive = true;
@@ -36,7 +51,7 @@ const startCaptainSelect = async (guild, guildDocument) => {
   guild.pugChannel.send(`${guild.pugQueryAuthor} please mention two players to select as captains.`)
   guild.pugChannel.awaitMessages(capFilter, { max: 1 }).then(c => {
 
-    //C contains all messages collected by MessageCollector,
+    //C contains all messages collected by tor,
     //we have { max: 1 } so only one message is collected
     guildDocument.setCaptain(1, c.first().mentions.users.first()).then(() => {
       guildDocument.setCaptain(2, c.first().mentions.users.last()).then(() => {
@@ -50,10 +65,125 @@ const startCaptainSelect = async (guild, guildDocument) => {
 
 module.exports.startCaptainSelect = startCaptainSelect;
 
+const movePlayersToTeams = async (guild, guildDocument) => {
+  guild.teamOneVoice = await createVoiceChannel(guild, 'Team 1');
+  guild.teamTwoVoice = await createVoiceChannel(guild, 'Team 2');
+
+  //Iterate moving players one at a time as doing it async seems to mess with discord api.
+  for (memberDoc of guildDocument.pugs.teams.one.players) {
+    const member = await guild.members.resolve(memberDoc.id);
+    if(member.user) await member.edit({channel: guild.teamOneVoice}).catch(e => e);
+  }
+  for (memberDoc of guildDocument.pugs.teams.two.players) {
+    const member = await guild.members.resolve(memberDoc.id);
+    if(member.user) await member.edit({channel: guild.teamTwoVoice}).catch(e => e);
+  }
+}
+
+const getAvailableMaps = (guild, guildDocument) => {
+  return maps[guild.mapPool]
+  .filter(p => !guild.teamVetos.one.includes(p) && !guild.teamVetos.two.includes(p))
+}
+
 const startMapVeto = async (guild, guildDocument) => {
   guildDocument.pugs.pugStates.pugTeamPickActive = false;
   guildDocument.pugs.pugStates.pugMapSelectActive = true;
+
+  guildDocument.save();
+
+  guild.choosingTeam = 1
+  guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.one.captain.id).user;
+
+  await guild.pugChannel.send(`${guild.pugQueryAuthor} please select map pool:\n${Object.keys(maps).join(', ')}`);
+  await guild.pugChannel.awaitMessages(mapPoolFilter, { max: 1}).then(c => {
+    guild.mapPool = c.first().content.trim().replace(' ', '_');
+  })
+
+  guild.teamVetos = {one: [], two: []}
+  guild.availableMaps = maps[guild.mapPool];
+
+
+  createMapEmbed(guild, guildDocument).then(pickEmbed => {
+    guild.mapEmbed = pickEmbed;
+    guild.mapCollectorListener = updateMapEmbed.bind(null, guild, guildDocument);
+    guild.mapCollector = guild.pugChannel.createMessageCollector(mapVetoFilter, {max: guild.availableMaps.length});
+    guild.mapCollector.on('collect', guild.mapCollectorListener);
+  })
 }
+
+const createMapEmbed = (guild, guildDocument) => {
+  const mapEmbedTemplate = {
+    color: 0xffca26,
+    title: `**${guild.choosingCaptain.username}** is choosing`,
+    description: ``,
+    fields: [
+      {
+        name:"Team 1",
+        value: '\u200b',
+        inline: true
+      },
+      {
+        name:`Available`,
+        value: '\u200b' + guild.availableMaps.join('\n'),
+        inline: true
+      },
+      {
+        name:`Team 2`,
+        value: '\u200b',
+        inline: true
+      }
+    ]
+  }
+
+  return guild.pugChannel.send({embed: mapEmbedTemplate});
+}
+
+const updateMapEmbed = (guild, guildDocument, message) => {
+  if(guild.choosingTeam === 1) {
+    guild.teamVetos.one.push(message.content.trim().replace(' ', '_'));
+    guild.choosingTeam = 2;
+    guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.two.captain.id).user;
+  } else {
+    guild.teamVetos.two.push(message.content.trim().replace(' ', '_'));
+    guild.choosingTeam = 1;
+    guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.one.captain.id).user;
+  }
+
+  guild.availableMaps = getAvailableMaps(guild, guildDocument);
+
+  const queryEmbedTemplate = {
+    color: 0xffca26,
+    title: `**${guild.choosingCaptain.username}** is choosing`,
+    fields: [
+      {
+        name:"Team 1",
+        value: '\u200b' + guild.teamVetos.one.map(m => `~~${m}~~`).join('\n'),
+        inline: true
+      },
+      {
+        name:`Available Maps`,
+        value: '\u200b' + guild.availableMaps.join('\n'),
+        inline: true
+      },
+      {
+        name:`Team 2`,
+        value: '\u200b' + guild.teamVetos.two.map(m => `~~${m}~~`).join('\n'),
+        inline: true
+      }
+    ]
+  }
+
+  if(guild.availableMaps.length === 1) {
+    guild.selectedMap = guild.availableMaps[0];
+    guild.mapCollector.removeListener('collect', guild.mapCollectorListener);
+    guild.mapCollector.stop();
+    guild.pugChannel.send(`Map selected! We are playing ${guild.selectedMap}`)
+  }
+
+  return guild.mapEmbed.edit({embed: queryEmbedTemplate});
+}
+
+module.exports.startMapVeto = startMapVeto;
 
 const updateTeamPickEmbed = (guild, guildDocument, message) => {
   guildDocument.addToTeam(guild.choosingTeam, message.mentions.users)
@@ -95,7 +225,9 @@ const updateTeamPickEmbed = (guild, guildDocument, message) => {
   if(guild.teamlessPlayers.length === 0) {
     guild.teamPickCollector.removeListener('collect', guild.teamPickCollectorListener);
     guild.teamPickCollector.stop();
-    startMapVeto(guild, guildDocument);
+    movePlayersToTeams(guild, guildDocument).then(() => {
+      startMapVeto(guild, guildDocument);
+    })
   }
 
   return guild.teamPickEmbed.edit({embed: queryEmbedTemplate});
