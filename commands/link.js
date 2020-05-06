@@ -11,7 +11,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 				message.channel.send("Your account is already linked.");
 				return;
 			}
-			message.author.send(`Please log into steam here: http://${config.authUrl}/${shortenedID}`)
+			message.author.send(`Please log into steam here: <http://${config.authUrl}/${shortenedID}>`)
 			return
     }
 
@@ -21,7 +21,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			discordTag: message.author.tag
 		})
 		newUserDoc.save().then(() => {
-			message.author.send(`Please log into steam here: http://${config.authUrl}/${shortenedID}`)
+			message.author.send(`Please log into steam here: <http://${config.authUrl}/${shortenedID}>`)
 		})
   }).catch((e) => {
     console.log(e);
