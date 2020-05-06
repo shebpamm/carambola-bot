@@ -32,5 +32,5 @@ module.exports.config = {
 	name: 'link',
 	category: 'pug',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['p']
+	commandAliases: ['li', 'connect']
 };
