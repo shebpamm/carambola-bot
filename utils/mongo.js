@@ -100,6 +100,32 @@ guildSchema.methods.clearTeams = function () {
 
 module.exports.Guild = mongoose.model('Guild', guildSchema);
 
+const userInfoSchema = new mongoose.Schema({
+	shortenedID: String,
+  discordID: String,
+  discordTag: String,
+	steam:
+  {
+    type:
+    {
+      steamID: String,
+      steamName: String,
+      profileurl: String,
+    },
+    set: setSteamInfo
+  }
+})
+
+function setSteamInfo(user) {
+  return {
+    steamID: user.id,
+    steamName: user.displayName,
+    profileurl: user.photos[2].value
+  }
+}
+
+module.exports.userInfo = mongoose.model('userInfo', userInfoSchema);
+
 // Initialize a connection to the Mongo database and return a promise that resolves after the connection opens.
 module.exports.init = async () => {
 	mongoose.connect('mongodb://localhost/carambola', {useNewUrlParser: true, useUnifiedTopology: true});
