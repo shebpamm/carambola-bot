@@ -1,5 +1,6 @@
 #Config file to not leak info:
 config.json
+config.test.json
 
 
 
