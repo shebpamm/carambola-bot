@@ -1,9 +1,9 @@
 module.exports.execute = async (client, message, args, guildDocument) => {
-	if (args[0] == 'query') {
-		players = message.mentions.users.map(user => {
+	if (args[0] === 'query') {
+		const players = message.mentions.users.map(user => {
 			return {id: user.id, username: user.username};
 		});
-		for (player of players) {
+		for (const player of players) {
 			await guildDocument.addInterestedPlayer(player);
 		}
 	}

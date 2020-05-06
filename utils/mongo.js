@@ -102,26 +102,26 @@ module.exports.Guild = mongoose.model('Guild', guildSchema);
 
 const userInfoSchema = new mongoose.Schema({
 	shortenedID: String,
-  discordID: String,
-  discordTag: String,
+	discordID: String,
+	discordTag: String,
 	steam:
-  {
-    type:
-    {
-      steamID: String,
-      steamName: String,
-      profileurl: String,
-    },
-    set: setSteamInfo
-  }
-})
+	{
+		type:
+		{
+			steamID: String,
+			steamName: String,
+			profileurl: String
+		},
+		set: setSteamInfo
+	}
+});
 
 function setSteamInfo(user) {
-  return {
-    steamID: user.id,
-    steamName: user.displayName,
-    profileurl: user.photos[2].value
-  }
+	return {
+		steamID: user.id,
+		steamName: user.displayName,
+		profileurl: user.photos[2].value
+	};
 }
 
 module.exports.userInfo = mongoose.model('userInfo', userInfoSchema);

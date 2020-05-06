@@ -9,20 +9,20 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 		}
 	}
 
-	if (args.length == 0) { // If no argument is given, reload both events and commands.
+	if (args.length === 0) { // If no argument is given, reload both events and commands.
 		eventLoader(client);
 		commandLoader(client);
 		message.reply('Reloaded successfully.');
 		return;
 	}
 
-	if (args[0] == 'commands') {
+	if (args[0] === 'commands') {
 		commandLoader(client);
 		message.reply('Reloaded commands successfully.');
 		return;
 	}
 
-	if (args[0] == 'events') {
+	if (args[0] === 'events') {
 		eventLoader(client);
 		message.reply('Reloaded events successfully.');
 		return;

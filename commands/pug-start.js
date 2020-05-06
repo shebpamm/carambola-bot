@@ -73,14 +73,14 @@ const movePlayersToTeams = async (guild, guildDocument) => {
 	guild.teamTwoVoice = await createVoiceChannel(guild, 'Team 2');
 
 	// Iterate moving players one at a time as doing it async seems to mess with discord api.
-	for (memberDoc of guildDocument.pugs.teams.one.players) {
+	for (const memberDoc of guildDocument.pugs.teams.one.players) {
 		const member = await guild.members.resolve(memberDoc.id);
 		if (member.user) {
 			await member.edit({channel: guild.teamOneVoice}).catch(error => error);
 		}
 	}
 
-	for (memberDoc of guildDocument.pugs.teams.two.players) {
+	for (const memberDoc of guildDocument.pugs.teams.two.players) {
 		const member = await guild.members.resolve(memberDoc.id);
 		if (member.user) {
 			await member.edit({channel: guild.teamTwoVoice}).catch(error => error);
@@ -298,7 +298,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 		message.guild.pugChannel = pugChannel;
 		message.guild.movedPugPlayers = [];
 
-		if (guildDocument.pugs.pugQuery.interestedPlayersCount >= guildDocument.pugs.pugQuery.targetPlayerCount || args.includes('force')) {
+		if (guildDocument.pugs.pugQuery.interestedPlayersCount >= guildDocument.pugs.pugQuery.targetPlayerCount || args.includes('force')) {
 			// Pug querying is now stopped as the next stage starts.
 			guildDocument.pugs.pugStates.pugQueryActive = false;
 			guildDocument.pugs.pugStates.pugLobbyJoinActive = true;
@@ -316,8 +316,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 				})
 			]);
 			// Iterate moving players one at a time as doing it async seems to mess with discord api.
-			for (member of message.guild.pugPlayers) {
-				res = await member.edit({channel: message.guild.pugLobbyChannel})
+			for (const member of message.guild.pugPlayers) {
+				await member.edit({channel: message.guild.pugLobbyChannel})
 					.then(member => {
 						// Add successfully moved players to an array
 						message.guild.movedPugPlayers.push(member);

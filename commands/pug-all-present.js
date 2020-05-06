@@ -1,4 +1,4 @@
-pugStart = require('./pug_start.js');
+const pugStart = require('./pug-start.js');
 
 module.exports.execute = async (client, message, args, guildDocument) => {
 	pugStart.startCaptainSelect(message.guild, guildDocument);

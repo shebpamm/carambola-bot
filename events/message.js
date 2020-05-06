@@ -2,11 +2,15 @@ const path = require('path');
 const config = require(path.join(__basedir, 'config.json'));
 
 module.exports = async (client, mongo, message) => {
-	if (message.author.bot) {
+	if (message.author.bot) { // If message author is a bot, ignore.
 		return;
-	} // If message author is a bot, ignore.
+	}
 
-	guildDocument = await mongo.Guild.findOne({guildID: message.guild.id}); // Find mongoose document with guild data.
+	if (message.channel.type !== 'text') { // Text is a guild text channel, so no dm's.
+		return;
+	}
+
+	let guildDocument = await mongo.Guild.findOne({guildID: message.guild.id}); // Find mongoose document with guild data.
 
 	if (!guildDocument) { // If no guildDocument is found.
 		// Code is just from guildCreate
@@ -19,7 +23,9 @@ module.exports = async (client, mongo, message) => {
 		guildDocument = document;
 	}
 
-	usedPrefix = guildDocument.config.customPrefix || config.commandPrefix; // Check if we have a custom prefix assigned for the server.
+	const usedPrefix = guildDocument.config.customPrefix || config.commandPrefix; // Check if we have a custom prefix assigned for the server.
+
+	let isPrefixed;
 
 	// Use different methods to compare depending if config has prefixCaseSensitive set or not.
 	if (config.prefixCaseSensitive || false) {

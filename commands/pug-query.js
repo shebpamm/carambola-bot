@@ -5,8 +5,8 @@ const isConfigured = (guildDocument, message) => { // Check if proper roles and 
 };
 
 const createPugQueryMessageEmbed = async (message, guildDocument) => {
-	pugRole = await message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
-	pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+	const pugRole = await message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
+	const pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
 	const queryEmbed = {
 		color: 0xFFCA26,
 		title: `${message.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
@@ -21,8 +21,7 @@ const createPugQueryMessageEmbed = async (message, guildDocument) => {
 };
 
 const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
-	pugRole = await embedMessage.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
-	pugChannel = await embedMessage.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+	const pugRole = await embedMessage.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
 	const queryEmbedTemplate = {
 		color: 0xFFCA26,
 		title: `${embedMessage.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
@@ -44,7 +43,7 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
 		]
 	};
 
-	queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
+	const queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
 	// QueryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
 
 	return embedMessage.edit(queryEmbed);
@@ -87,25 +86,23 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 		if (['new', 'start', 'go'].includes(args[0])) {
 			if (guildDocument.pugs.pugStates.pugQueryActive) {
 				message.channel.send('There is already a pug query active.\nYou can cancel it with `pug query cancel`');
-			} else { // TODO: Going to be more active steps to check for.
-				if (isConfigured(guildDocument, message)) { // Check if the bot has been given a proper channel to post in and a role to mention.
-					guildDocument.pugs.lastCreatedAt = undefined;
-					await guildDocument.clearInterestedPlayers();
+			} else if (isConfigured(guildDocument, message)) { // Check if the bot has been given a proper channel to post in and a role to mention.
+				guildDocument.pugs.lastCreatedAt = undefined;
+				await guildDocument.clearInterestedPlayers();
 
-					message.guild.pugQueryAuthor = message.author;
+				message.guild.pugQueryAuthor = message.author;
 
-					createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { // Create a new embed and send it.
-						message.guild.pugQueryMessage = queryMessage;
-						queryMessage.react('👍').then(queryMessageReaction => {
-							// Create a reaction collector after the message has been sent.
-							message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
-						});
+				createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { // Create a new embed and send it.
+					message.guild.pugQueryMessage = queryMessage;
+					queryMessage.react('👍').then(queryMessageReaction => {
+						// Create a reaction collector after the message has been sent.
+						message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
 					});
-					guildDocument.pugs.pugStates.pugQueryActive = true;
-					guildDocument.save();
-				} else {
-					message.channel.send('Please give the bot a role to mention and a channel to post in:```pug config role @<role>\npug config channel #<channel>```');
-				}
+				});
+				guildDocument.pugs.pugStates.pugQueryActive = true;
+				guildDocument.save();
+			} else {
+				message.channel.send('Please give the bot a role to mention and a channel to post in:```pug config role @<role>\npug config channel #<channel>```');
 			}
 		}
 

@@ -1,4 +1,3 @@
-const Discord = require('discord.js');
 const requireAll = require('require-all');
 
 module.exports = client => {
