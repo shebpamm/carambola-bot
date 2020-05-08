@@ -37,7 +37,7 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
 			},
 			{
 				name: 'Reserve players:',
-				value: '\u200B' + guildDocument.pugs.pugQuery.interestedPlayers.slice(11).map(p => p.username).join('\n'),
+				value: '\u200B' + guildDocument.pugs.pugQuery.interestedPlayers.slice(10).map(p => p.username).join('\n'),
 				inline: true
 			}
 		]
