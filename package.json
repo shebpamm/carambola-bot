@@ -9,7 +9,9 @@
   "author": "shebpamm",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.19.2",
     "discord.js": "^12.2.0",
+    "form-data": "^3.0.0",
     "mongoose": "^5.9.12",
     "require-all": "^3.0.0"
   },
@@ -23,8 +25,10 @@
     "rules": {
       "no-unused-vars": [
         "error",
-        {"args": "none"}
-        ],
+        {
+          "args": "none"
+        }
+      ],
       "guard-for-in": "off",
       "unicorn/no-for-loop": "off",
       "unicorn/filename-case": [

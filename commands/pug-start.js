@@ -1,5 +1,7 @@
 const path = require('path');
 const maps = require(path.join(__basedir, 'maps.json'));
+const dathost = require(path.join(__basedir, '/utils/dathost.js'));
+
 
 const createPugLobby = (message, guildDocument) => {
 	return message.guild.channels.create('Scrim Lobby', {topic: 'Carambola', type: 'voice'});
@@ -185,6 +187,7 @@ const updateMapEmbed = (guild, guildDocument, message) => {
 		guild.mapCollector.removeListener('collect', guild.mapCollectorListener);
 		guild.mapCollector.stop();
 		guild.pugChannel.send(`Map selected! We are playing ${guild.selectedMap}`);
+		dathost.newMatch(guild, guildDocument);
 	}
 
 	return guild.mapEmbed.edit({embed: queryEmbedTemplate});

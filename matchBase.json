@@ -1,0 +1,62 @@
+{
+	"matchid": "carambola-scrim",
+	"num_maps": 1,
+	"players_per_team": 5,
+	"min_players_to_ready": 1,
+	"min_spectators_to_ready": 0,
+	"skip_veto": true,
+	"side_type": "always_knife",
+
+	"maplist":
+	[
+		"de_inferno"
+	],
+
+	"team1": {
+		"name": "Team 1",
+		"players":
+		[
+			"STEAM_0:1:58836012",
+			"STEAM_1:1:.....",
+			"STEAM_1:1:.....",
+			"STEAM_1:1:.....",
+			"STEAM_1:1:....."
+		]
+	},
+
+	"team2": {
+		"name": "Team 2",
+		"players":
+		[
+			"STEAM_1:1:46796472",
+			"STEAM_1:1:.....",
+			"STEAM_1:1:.....",
+			"STEAM_1:1:.....",
+			"STEAM_1:1:....."
+		]
+	},
+
+	"cvars": {
+		"hostname": "Carambola",
+		"mp_autokick" : "0",
+		"mp_autoteambalance" : "0",
+		"mp_c4timer" : "40",
+		"mp_endmatch_votenextmap" : "0",
+		"mp_endmatch_votenextmap_keepcurrent" : "1",
+		"mp_friendlyfire" : "0",
+		"mp_give_player_c4" : "1",
+		"mp_halftime_pausetimer" : "0",
+		"mp_limitteams" : "32",
+		"mp_match_restart_delay" : "120",
+		"mp_overtime_enable" : "1",
+		"mp_overtime_halftime_pausetimer" : "1",
+		"mp_overtime_startmoney" : "16000",
+		"mp_round_restart_delay" : "7",
+		"mp_roundtime" : "1.92",
+		"mp_roundtime_defuse" : "1.92",
+		"mp_timelimit" : "0",
+		"mp_death_drop_defuser" : "1",
+		"mp_death_drop_grenade" : "1",
+		"mp_death_drop_gun" : "1"
+	}
+}
