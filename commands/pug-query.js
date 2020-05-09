@@ -10,14 +10,14 @@ const createPugQueryMessageEmbed = async (message, guildDocument) => {
 	const queryEmbed = {
 		color: 0xFFCA26,
 		title: `${message.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
-		description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
+		description: `If you're interested, react with :thumbsup: below!`,
 		fields: [
 			{
 				name: 'Player count:', value: '0/10'
 			}
 		]
 	};
-	return pugChannel.send({embed: queryEmbed});
+	return pugChannel.send(pugRole, {embed: queryEmbed});
 };
 
 const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
@@ -25,7 +25,7 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
 	const queryEmbedTemplate = {
 		color: 0xFFCA26,
 		title: `${embedMessage.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
-		description: `If you're interested, react with :thumbsup: below! ${pugRole}`,
+		description: `If you're interested, react with :thumbsup: below!`,
 		fields: [
 			{
 				name: 'Player count:', value: `${guildDocument.pugs.pugQuery.interestedPlayersCount}/10`
@@ -54,14 +54,14 @@ const reactionCollectorFilter = (reaction, user) => {
 };
 
 const onQueryReactionCollect = (guildDocument, reaction, user) => {
-	console.log(`${user.tag} reacted! ${reaction.message}`);
+	//console.log(`${user.tag} reacted! ${reaction.message}`);
 	guildDocument.addInterestedPlayer(user).then(() => {
 		updatePugQueryMessageEmbed(reaction.message, guildDocument);
 	});
 };
 
 const onQueryReactionRemove = (guildDocument, reaction, user) => {
-	console.log(`${user.tag} un-reacted!`);
+	//console.log(`${user.tag} un-reacted!`);
 	guildDocument.removeInterestedPlayer(user).then(() => {
 		updatePugQueryMessageEmbed(reaction.message, guildDocument);
 	});
