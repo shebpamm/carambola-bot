@@ -1,6 +1,7 @@
 const pugStart = require('./pug-start.js');
 
 module.exports.execute = async (client, message, args, guildDocument) => {
+	client.removeListener('voiceStateUpdate', message.guild.voiceStateListener);
 	pugStart.startCaptainSelect(message.guild, guildDocument);
 };
 
