@@ -1,7 +1,7 @@
 const path = require('path');
 const maps = require(path.join(__basedir, 'maps.json'));
 const dathost = require(path.join(__basedir, '/utils/dathost.js'));
-
+const linking = require(path.join(__basedir, '/utils/link.js'));
 
 const createPugLobby = (message, guildDocument) => {
 	return message.guild.channels.create('Scrim Lobby', {topic: 'Carambola', type: 'voice'});
@@ -25,7 +25,13 @@ const onVoiceStateUpdate = (guild, guildDocument, oldState, newState) => {
 };
 
 const capFilter = response => {
-	return response.mentions.users.size === 2 && response.author.id === response.guild.pugQueryAuthor.id;
+	try { //This try is here because if someone were to run cleanup while the awaitMessages is waiting, it crashes the whole bot.
+		return response.mentions.users.size === 2 && response.author.id === response.guild.pugQueryAuthor.id;
+	} catch (error) {
+		console.log("Someone probably went and cleaned while picking captain");
+		return false;
+	}
+
 };
 
 const areMentionsTeamless = message => {
@@ -56,7 +62,7 @@ const startCaptainSelect = async (guild, guildDocument) => {
 
 	guild.pugChannel.send(`${guild.pugQueryAuthor} please mention two players to select as captains.`);
 	guild.pugChannel.awaitMessages(capFilter, {max: 1}).then(c => {
-		// C contains all messages collected by tor,
+		// C contains all messages collected by collector,
 		// we have { max: 1 } so only one message is collected
 		guildDocument.setCaptain(1, c.first().mentions.users.first()).then(() => {
 			guildDocument.setCaptain(2, c.first().mentions.users.last()).then(() => {
@@ -147,7 +153,7 @@ const createMapEmbed = (guild, guildDocument) => {
 	return guild.pugChannel.send({embed: mapEmbedTemplate});
 };
 
-const updateMapEmbed = (guild, guildDocument, message) => {
+const updateMapEmbed = async (guild, guildDocument, message) => {
 	if (guild.choosingTeam === 1) {
 		guild.teamVetos.one.push(message.content.trim().replace(' ', '_'));
 		guild.choosingTeam = 2;
@@ -186,8 +192,28 @@ const updateMapEmbed = (guild, guildDocument, message) => {
 		guild.selectedMap = guild.availableMaps[0];
 		guild.mapCollector.removeListener('collect', guild.mapCollectorListener);
 		guild.mapCollector.stop();
-		guild.pugChannel.send(`Map selected! We are playing ${guild.selectedMap}`);
-		dathost.newMatch(guild, guildDocument);
+		guild.pugChannel.send(`Map selected! We are playing **${guild.selectedMap}**. Starting server...`);
+
+		guildDocument.pugs.pugStates.pugMapSelectActive = false;
+		guildDocument.pugs.pugStates.pugGameActive = true;
+
+		await guildDocument.save();
+
+		guild.notLinkedPlayers = [];
+		for (player of guild.pugPlayers) {
+			await linking.getUserInfoDocument(guild.client.mongo, player).then(async userInfoDocument => {
+				if ( !linking.isUserLinked(userInfoDocument) ) {
+					guild.notLinkedPlayers.push(player);
+				}
+			})
+		}
+
+		if(guild.notLinkedPlayers.length !== 0) {
+			guild.pugChannel.send(`Players ${guild.notLinkedPlayers.join(' ')} have not yet linked their steam. Please type \`pug resume\` when everyone is linked.`);
+		} else {
+			const matchIP = await dathost.newMatch(guild, guildDocument);
+			guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\`\n**Or open:** <steam://${matchIP}>`)
+		}
 	}
 
 	return guild.mapEmbed.edit({embed: queryEmbedTemplate});
@@ -330,6 +356,28 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 
 			// Make a list of people missing by eliminating all players that have been moved.
 			message.guild.missingPlayers = message.guild.pugPlayers.filter(p => !message.guild.movedPugPlayers.map(c => c.id).includes(p.id));
+
+			message.guild.cannotContactPlayers = [];
+			for (player of message.guild.pugPlayers) {
+				await linking.getUserInfoDocument(message.client.mongo, player).then(async userInfoDocument => {
+					if ( !linking.isUserLinked(userInfoDocument) ) {
+						if(!userInfoDocument) {
+							userInfoDocument = await linking.createUserInfoDocument(message.client.mongo, player);
+						}
+						return player.send(`Hi there! Looks like you're attending a pug but haven't linked your steam yet.
+						Please log into steam here: <${linking.getUserLinkingUrl(userInfoDocument)}>`).catch(error => {
+							if(error.code === 50007) message.guild.cannotContactPlayers.push(player)
+							//console.log(message.guild.cannotContactPlayers)
+						})
+					}
+				})
+			}
+
+			console.log(message.guild.cannotContactPlayers);
+			if(message.guild.cannotContactPlayers.length !== 0) {
+				pugChannel.send(`Could not DM the following players: ${message.guild.cannotContactPlayers.join(' ')}
+Please check your Privacy & Safety settings.`);
+			}
 
 			if (message.guild.missingPlayers.length === 0) {
 				pugChannel.send('Created a new lobby and moved everyone.');

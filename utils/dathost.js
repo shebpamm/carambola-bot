@@ -61,6 +61,19 @@ async function waitForServerToStart() {
   return true;
 }
 
+async function getServerIP() {
+  return axios.get(
+    `https://dathost.net/api/0.1/game-servers/${botConfig.dathost.serverID}`,
+    {
+      headers: { 'X-Fields': 'ip,ports'},
+      auth: {
+        username: botConfig.dathost.email,
+        password: botConfig.dathost.password
+      }
+    }
+  ).then(response => `${response.data.ip}:${response.data.ports.game}`);
+}
+
 async function startServer() {
   axios.post(
     `https://dathost.net/api/0.1/game-servers/${botConfig.dathost.serverID}/start`,
@@ -72,11 +85,27 @@ async function startServer() {
       }
     }
   );
-  return waitForServerToStart();
+  const serverIP = getServerIP();
+  await waitForServerToStart();
+  //console.log(serverIP)
+  return serverIP;
+}
+
+module.exports.stopServer = stopServer;
+async function stopServer() {
+  axios.post(
+    `https://dathost.net/api/0.1/game-servers/${botConfig.dathost.serverID}/stop`,
+    null,
+    {
+      auth: {
+        username: botConfig.dathost.email,
+        password: botConfig.dathost.password
+      }
+    }
+  );
 }
 
 module.exports.loadGet5Config = loadGet5Config;
-
 async function loadGet5Config() {
   const command = "line=get5_loadmatch%20match.json"
 
@@ -128,8 +157,10 @@ async function constructMatchConfig(guild, guildDocument) {
 
 module.exports.newMatch = (guild, guildDocument) => {
   return constructMatchConfig(guild, guildDocument).then(matchConfig => {
-    startServer().then( () => {
-        uploadConfig(matchConfig).then((response) => loadGet5Config());
+    return startServer().then( (serverIP) => {
+        return uploadConfig(matchConfig).then((response) => loadGet5Config().then(() => {
+          return serverIP;
+        }));
       });
   });
 }
