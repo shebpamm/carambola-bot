@@ -42,6 +42,10 @@ const guildSchema = new mongoose.Schema({
 		pugs: {
 			pugChannelID: String,
 			pugUserRoleID: String
+		},
+		stealth: {
+			hiddenVoiceID: String,
+			hiddenVoiceRoleID: String
 		}
 	}
 }, {minimize: true});
