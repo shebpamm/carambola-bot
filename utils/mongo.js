@@ -46,6 +46,9 @@ const guildSchema = new mongoose.Schema({
 		stealth: {
 			hiddenVoiceID: String,
 			hiddenVoiceRoleID: String
+		},
+		admin: {
+			adminRoleID: String
 		}
 	}
 }, {minimize: true});

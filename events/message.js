@@ -53,6 +53,18 @@ module.exports = async (client, mongo, message) => {
 					}
 				}
 
+				//Check that the user has sufficient permissions for the command
+				if(resolvedCommand.config.permissions) {
+					if (!message.member.hasPermission('ADMINISTRATOR')) { //If user has the ADMINISTRATOR permission, skip permission checks.
+						if (resolvedCommand.config.permissions.includes('admin')) {
+							if (!message.member.roles.cache.has(guildDocument.config.admin.adminRoleID)) {
+								message.channel.send("You don't have permissions to run this command.");
+								return;
+							}
+						}
+					}
+				}
+
 				// Check if command is a dev command, and deny it if the author is not a Developer.
 				if (resolvedCommand.config.category === 'developer') {
 					if (message.author.id !== config.developerID) {
