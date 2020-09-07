@@ -36,7 +36,7 @@ module.exports = async (client, mongo, message) => {
 
 	// Check if message contains wanted command prefix
 	if (isPrefixed) {
-		const [catg, cmd, ...args] = message.content.trim().slice(usedPrefix.length).trim().split(/\s+/g); // Split command into an array.
+		const [catg, cmd, ...args] = message.content.trim().slice(usedPrefix.length).trim().match(/(?:[^\s"]+|"[^"]*")+/g).map(a => a.replace(/^"(.+(?="$))"$/, '$1'))
 
 		// Check if category is valid:
 		const resolvedCatg = client.categories[catg] || client.categories[client.categoryAliases.get(catg)];
