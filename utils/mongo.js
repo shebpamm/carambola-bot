@@ -14,7 +14,7 @@ const guildSchema = new mongoose.Schema({
 			pugQueryActive: {type: Boolean, default: false},
 			pugLobbyJoinActive: {type: Boolean, default: false},
 			pugCaptainPickActive: {type: Boolean, default: false},
-			pugTeamSelectActive: {type: Boolean, default: false},
+			pugTeamPickActive: {type: Boolean, default: false},
 			pugMapSelectActive: {type: Boolean, default: false},
 			pugGameActive: {type: Boolean, default: false},
 		},
