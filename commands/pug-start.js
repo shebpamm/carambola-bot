@@ -60,6 +60,8 @@ const startCaptainSelect = async (guild, guildDocument) => {
 
 	await guildDocument.clearTeams();
 
+	guildDocument.save()
+
 	guild.pugChannel.send(`${guild.pugQueryAuthor} please mention two players to select as captains.`);
 	guild.pugChannel.awaitMessages(capFilter, {max: 1}).then(c => {
 		// C contains all messages collected by collector,
