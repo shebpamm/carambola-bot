@@ -9,6 +9,7 @@ function isPugActive(guildDocument) {
 module.exports.execute = async (client, message, args, guildDocument) => {
 	if(guildDocument.pugs.pugStates.pugCaptainPickActive) {
 		message.channel.send('Due to a bug, please first select two captains and then run this command again.');
+		return
 	}
 
 	if (isPugActive(guildDocument)) {
