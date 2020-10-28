@@ -87,7 +87,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 		if (guildDocument.pugs.pugStates.pugQueryActive) {
 			message.channel.send(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
 		} else {
-			message.channel.send('There isn\'t a query running right now.\n Start one with the command: `pug query new`');
+			message.channel.send(`There isn't a query running right now.\n Start one with the command: \`${guildDocument.config.usedPrefix} pug query new\``);
 		}
 	}
 
@@ -111,7 +111,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 				guildDocument.pugs.pugStates.pugQueryActive = true;
 				guildDocument.save();
 			} else {
-				message.channel.send('Please give the bot all the roles required and a channel to post in:```pug config role @<role>\npug config channel #<channel>```');
+				message.channel.send(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
 			}
 		}
 

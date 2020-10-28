@@ -36,7 +36,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 					message.channel.send('Region changed successfully.');
 				});
 			} else {
-				message.channel.send('Please input the region name.\nYou can list all the available regions by typing this command without parameters.');
+				message.channel.send(`Please input the region name.\nYou can list all the available regions by typing ${guildDocument.config.usedPrefix} manage region`);
 			}
 		});
 	}

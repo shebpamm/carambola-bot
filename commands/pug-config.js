@@ -8,7 +8,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			if (currentRole.id) {
 				message.channel.send(`Currently assigned pug role: **${currentRole.name}**`, {allowedMentions: {parse: []}});
 			} else {
-				message.channel.send('No pug role assigned.\nAssign one with:\n`pug config role @<role>`');
+				message.channel.send(`No pug role assigned.\nAssign one with:\n\`${guildDocument.config.usedPrefix} pug config role @<role>\``);
 			}
 		}
 
@@ -18,7 +18,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			if (currentRole.id) {
 				message.channel.send(`Currently assigned active role: **${currentRole.name}**`, {allowedMentions: {parse: []}});
 			} else {
-				message.channel.send('No active role assigned.\nAssign one with:\n`pug config activeRole @<role>`');
+				message.channel.send(`No active role assigned.\nAssign one with:\n\`${guildDocument.config.usedPrefix} pug config activeRole @<role>\``);
 			}
 		}
 
@@ -29,7 +29,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			if (currentChannel) {
 				message.channel.send(`Currently assigned pug channel: **${currentChannel.name}**`, {allowedMentions: {parse: []}});
 			} else {
-				message.channel.send('No pug channel assigned.\nAssign one with:\n`pug config channel #<channel>`');
+				message.channel.send(`No pug channel assigned.\nAssign one with:\n\`${guildDocument.config.usedPrefix} pug config channel #<channel>\``);
 			}
 		}
 

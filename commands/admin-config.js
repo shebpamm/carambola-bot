@@ -10,7 +10,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			if (currentRole.id) {
 				message.channel.send(`Currently assigned admin role: **${currentRole.name}**`);
 			} else {
-				message.channel.send('No admin role assigned.\nAssign one with:\n`admin config role @<role>`');
+				message.channel.send(`No admin role assigned.\nAssign one with:\n\`${guildDocument.config.usedPrefix} admin config role @<role>\``);
 			}
 		}
 	} else if (args.length === 2) { // Set a new value
