@@ -55,16 +55,18 @@ const guildSchema = new mongoose.Schema({
 
 // Adds players to the array and keeps track of the count.
 guildSchema.methods.addInterestedPlayer = function (user) {
-	this.pugs.pugQuery.interestedPlayersCount++;
-	this.pugs.pugQuery.interestedPlayers.push({id: user.id, username: user.username});
-	return this.save();
+	return Promise.all([
+		this.updateOne({$inc:{'pugs.pugQuery.interestedPlayersCount':1}}).exec(),
+		this.updateOne({$push:{'pugs.pugQuery.interestedPlayers': {id: user.id, username: user.username} }}).exec(),
+	])
 };
 
 // Removes players from the array and keeps track of the count.
 guildSchema.methods.removeInterestedPlayer = function (user) {
-	this.pugs.pugQuery.interestedPlayersCount--;
-	this.pugs.pugQuery.interestedPlayers = this.pugs.pugQuery.interestedPlayers.filter(u => u.id !== user.id); // A bit ugly but the array is never going to be big :shrug:
-	return this.save();
+	return Promise.all([
+		this.updateOne({$inc:{'pugs.pugQuery.interestedPlayersCount':-1}}).exec(),
+		this.updateOne({$pull:{'pugs.pugQuery.interestedPlayers': {id: user.id, username: user.username} }}).exec()
+	])
 };
 
 guildSchema.methods.clearInterestedPlayers = function () {

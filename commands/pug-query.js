@@ -53,18 +53,18 @@ const reactionCollectorFilter = (reaction, user) => {
 	return reaction.emoji.name === '👍' && !user.bot; // Is a thumbsup, cant see it on my os lol.
 };
 
-const onQueryReactionCollect = (guildDocument, reaction, user) => {
+const onQueryReactionCollect = async (guildDocument, reaction, user) => {
 	//console.log(`${user.tag} reacted! ${reaction.message}`);
-	guildDocument.addInterestedPlayer(user).then(() => {
-		updatePugQueryMessageEmbed(reaction.message, guildDocument);
-	});
+	await guildDocument.addInterestedPlayer(user);
+	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
+	return updatePugQueryMessageEmbed(reaction.message, refreshedDocument);
 };
 
-const onQueryReactionRemove = (guildDocument, reaction, user) => {
+const onQueryReactionRemove = async (guildDocument, reaction, user) => {
 	//console.log(`${user.tag} un-reacted!`);
-	guildDocument.removeInterestedPlayer(user).then(() => {
-		updatePugQueryMessageEmbed(reaction.message, guildDocument);
-	});
+	guildDocument.removeInterestedPlayer(user);
+	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
+	return updatePugQueryMessageEmbed(reaction.message, refreshedDocument);
 };
 
 const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
