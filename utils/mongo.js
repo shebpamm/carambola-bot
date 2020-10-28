@@ -43,7 +43,8 @@ const guildSchema = new mongoose.Schema({
 			pugChannelID: String,
 			pugUserRoleID: String,
 			pugActiveRoleID: String,
-			pugPingOnQuery: {type: Boolean, default: false}
+			pugPingOnQuery: {type: Boolean, default: false},
+			useActiveRole: {type: Boolean, default: false}
 		},
 		stealth: {
 			hiddenVoiceID: String,

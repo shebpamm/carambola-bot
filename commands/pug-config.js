@@ -12,6 +12,16 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			}
 		}
 
+		if (['activeRole'].includes(args[0])) { // Check if args[0] is either role or mention
+			const currentRole = await message.guild.roles.fetch(guildDocument.config.pugs.pugActiveRoleID || ''); // Try to resolve the RoleId found in db.
+			// If role is found, send message. Otherwise print no pug role.
+			if (currentRole.id) {
+				message.channel.send(`Currently assigned active role: **${currentRole.name}**`, {allowedMentions: {parse: []}});
+			} else {
+				message.channel.send('No active role assigned.\nAssign one with:\n`pug config activeRole @<role>`');
+			}
+		}
+
 		if (['channel', 'feed'].includes(args[0])) {
 			// Try to resolve current channel.
 			const currentChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
@@ -27,12 +37,24 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			message.channel.send(`Pinging on query is currently set to **${guildDocument.config.pugs.pugPingOnQuery}**`)
 		}
 
+		if(args[0] == "useActiveRole") {
+			message.channel.send(`Active role assigning is currently set to **${guildDocument.config.pugs.useActiveRole}**`)
+		}
+
 	} else if (args.length === 2) { // Set a new value
 		if (['role', 'mention'].includes(args[0])) {
 			if (message.mentions.roles.size === 1) { // Check that the message contains exactly one role mention.
 				guildDocument.config.pugs.pugUserRoleID = message.mentions.roles.first().id;
 				guildDocument.save();
 				message.channel.send('New role assigned successfully.');
+			}
+		}
+
+		if (['activeRole'].includes(args[0])) {
+			if (message.mentions.roles.size === 1) { // Check that the message contains exactly one role mention.
+				guildDocument.config.pugs.pugActiveRoleID = message.mentions.roles.first().id;
+				guildDocument.save();
+				message.channel.send('Active role assigned successfully.');
 			}
 		}
 
@@ -56,6 +78,22 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			}
 			if(args[1].toLowerCase() == "true") {
 				guildDocument.config.pugs.pugPingOnQuery = true;
+				guildDocument.save();
+				return message.channel.send("Option changed successfully.")
+			}
+
+			return message.channel.send("Incorrect value.")
+
+		}
+
+		if(args[0] == "useActiveRole") {
+			if(args[1].toLowerCase() == "false") {
+				guildDocument.config.pugs.useActiveRole = false;
+				guildDocument.save();
+				return message.channel.send("Option changed successfully.")
+			}
+			if(args[1].toLowerCase() == "true") {
+				guildDocument.config.pugs.useActiveRole = true;
 				guildDocument.save();
 				return message.channel.send("Option changed successfully.")
 			}

@@ -28,6 +28,11 @@ const cleanableProperties = [
 	'selectedMap'
 ]
 
+const clearActiveRoles = async (guild, players, activeRoleID) => {
+	players.map(usr => {
+		guild.members.resolve(usr.id).roles.remove(activeRoleID)
+	})
+}
 
 const endEmbeds = (guild) => {
 	if(guild.pugQueryMessage) endEmbed(guild.pugQueryMessage);
@@ -61,6 +66,7 @@ const deleteProperties = (guild) => {
 }
 
 const doCleanup = (guild, guildDocument) => {
+	clearActiveRoles(guild, guildDocument.pugs.pugQuery.interestedPlayers, guildDocument.config.pugs.pugActiveRoleID);
 	guildDocument.pugs.pugQuery.interestedPlayersCount = 0;
 	guildDocument.pugs.pugQuery.interestedPlayers = [];
 	Object.keys(guildDocument.pugs.pugStates).forEach(v => guildDocument.pugs.pugStates[v] = false); //Sets all pugStates to false

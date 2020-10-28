@@ -1,7 +1,9 @@
 const Discord = require('discord.js');
 
 const isConfigured = (guildDocument, message) => { // Check if proper roles and channel have been assigned.
-	return message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '') && message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+	return message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '')
+	&& message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID)
+	&& (!guildDocument.config.pugs.useActiveRole || message.guild.roles.fetch(guildDocument.config.pugs.pugActiveRoleID || ''));
 };
 
 const createPugQueryMessageEmbed = async (message, guildDocument) => {
@@ -55,6 +57,9 @@ const reactionCollectorFilter = (reaction, user) => {
 
 const onQueryReactionCollect = async (guildDocument, reaction, user) => {
 	//console.log(`${user.tag} reacted! ${reaction.message}`);
+	if(guildDocument.config.pugs.useActiveRole) {
+		reaction.message.guild.member(user).roles.add(guildDocument.config.pugs.pugActiveRoleID);
+	}
 	await guildDocument.addInterestedPlayer(user);
 	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
 	return updatePugQueryMessageEmbed(reaction.message, refreshedDocument);
@@ -62,7 +67,11 @@ const onQueryReactionCollect = async (guildDocument, reaction, user) => {
 
 const onQueryReactionRemove = async (guildDocument, reaction, user) => {
 	//console.log(`${user.tag} un-reacted!`);
-	guildDocument.removeInterestedPlayer(user);
+	if(guildDocument.config.pugs.useActiveRole) {
+		reaction.message.guild.member(user).roles.remove(guildDocument.config.pugs.pugActiveRoleID);
+	}
+
+	await guildDocument.removeInterestedPlayer(user);
 	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
 	return updatePugQueryMessageEmbed(reaction.message, refreshedDocument);
 };
@@ -102,7 +111,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 				guildDocument.pugs.pugStates.pugQueryActive = true;
 				guildDocument.save();
 			} else {
-				message.channel.send('Please give the bot a role to mention and a channel to post in:```pug config role @<role>\npug config channel #<channel>```');
+				message.channel.send('Please give the bot all the roles required and a channel to post in:```pug config role @<role>\npug config channel #<channel>```');
 			}
 		}
 
