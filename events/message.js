@@ -23,7 +23,7 @@ module.exports = async (client, mongo, message) => {
 		guildDocument = document;
 	}
 
-	const usedPrefix = guildDocument.config.customPrefix || config.commandPrefix; // Check if we have a custom prefix assigned for the server.
+	const usedPrefix = guildDocument.config.usedPrefix
 
 	let isPrefixed;
 

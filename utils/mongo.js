@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const path = require('path');
+const config = require(path.join(__basedir, 'config.json'));
+
 mongoose.set('useFindAndModify', false);
 
 // Define a schema for the guilds.
@@ -38,7 +41,7 @@ const guildSchema = new mongoose.Schema({
 
 	// Per-server defined configuration settings.
 	config: {
-		customPrefix: String,
+		usedPrefix: {type: String, default: config.commandPrefix},
 		pugs: {
 			pugChannelID: String,
 			pugUserRoleID: String,
