@@ -21,7 +21,7 @@ const updateQueryMessageEmbed = async (embedMessage, queryObject) => {
 		description: `If you're interested, react with :thumbsup: below!`,
 		fields: [
 			{
-				name: 'Player count:', value: `${queryObject.queryData.interestedPlayersCount}/10`
+				name: 'Player count:', value: `${queryObject.queryData.interestedPlayersCount}/${queryObject.queryData.targetPlayerCount}`
 			},
 			{
 				name: `Players (${Math.min(queryObject.queryData.interestedPlayersCount, queryObject.queryData.targetPlayerCount)}/${queryObject.queryData.targetPlayerCount}):`,
