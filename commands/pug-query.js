@@ -17,7 +17,7 @@ const createPugQueryMessageEmbed = async (message, guildDocument) => {
 			}
 		]
 	};
-	return pugChannel.send(pugRole, {embed: queryEmbed});
+	return pugChannel.send((guildDocument.config.pugs.pugPingOnQuery ? pugRole : ""), {embed: queryEmbed});
 };
 
 const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {

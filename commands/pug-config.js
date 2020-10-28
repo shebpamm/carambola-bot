@@ -22,6 +22,11 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 				message.channel.send('No pug channel assigned.\nAssign one with:\n`pug config channel #<channel>`');
 			}
 		}
+
+		if(args[0] == "pingOnQuery") {
+			message.channel.send(`Pinging on query is currently set to **${guildDocument.config.pugs.pugPingOnQuery}**`)
+		}
+
 	} else if (args.length === 2) { // Set a new value
 		if (['role', 'mention'].includes(args[0])) {
 			if (message.mentions.roles.size === 1) { // Check that the message contains exactly one role mention.
@@ -41,6 +46,22 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 					message.channel.send('Invalid Channel. Please use a text channel.');
 				}
 			}
+		}
+
+		if(args[0] == "pingOnQuery") {
+			if(args[1].toLowerCase() == "false") {
+				guildDocument.config.pugs.pugPingOnQuery = false;
+				guildDocument.save();
+				return message.channel.send("Option changed successfully.")
+			}
+			if(args[1].toLowerCase() == "true") {
+				guildDocument.config.pugs.pugPingOnQuery = true;
+				guildDocument.save();
+				return message.channel.send("Option changed successfully.")
+			}
+
+			return message.channel.send("Incorrect value.")
+
 		}
 	}
 };
