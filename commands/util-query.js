@@ -68,6 +68,7 @@ const createQueryReactionCollector = (queryMessage, queryObject) => {
 	collector.on('collect', onQueryReactionCollect.bind(null, queryMessage, queryObject));
 	collector.on('remove', onQueryReactionRemove.bind(null, queryMessage, queryObject));
 	collector.on('end', endQueryMessageEmbed.bind(null, queryMessage));
+	return collector;
 };
 
 const addInterestedPlayer = (queryObject, user) => {

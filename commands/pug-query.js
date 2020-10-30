@@ -80,6 +80,7 @@ const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
 	const collector = queryMessage.createReactionCollector(reactionCollectorFilter, {dispose: true});
 	collector.on('collect', onQueryReactionCollect.bind(null, guildDocument));
 	collector.on('remove', onQueryReactionRemove.bind(null, guildDocument));
+	return collector;
 };
 
 module.exports.execute = async (client, message, args, guildDocument) => {
