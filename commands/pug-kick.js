@@ -33,5 +33,5 @@ module.exports.config = {
 	name: 'kick',
 	category: 'pug',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['🥾', 'boot', 'begone', 'kk']
+	commandAliases: ['👢', 'boot', 'begone', 'kk']
 };
