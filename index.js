@@ -8,7 +8,7 @@ const mongo = require('./utils/mongo.js');
 
 mongo.init();
 
-const client = new Discord.Client();
+const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] });
 const config = require('./config.json');
 
 client.mongo = mongo;
