@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
-    "discord.js": "github:discordjs/discord.js#master",
+    "discord.js": "github:discordjs/discord.js",
     "form-data": "^3.0.0",
     "mongoose": "^5.10.9",
     "require-all": "^3.0.0"
