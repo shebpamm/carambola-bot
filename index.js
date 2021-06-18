@@ -8,14 +8,21 @@ const mongo = require('./utils/mongo.js');
 
 mongo.init();
 
-const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Discord.Client({
+  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES],
+  allowedMentions: { parse: ['users', 'roles'] }
+});
 const config = require('./config.json');
 
 client.mongo = mongo;
 
-eventLoader(client, mongo); // Fetch all eventHandlers in events/ folder.
-commandLoader(client); // Fetch all commandHandlers in events/ folder.
+client.login(config.botUserToken);
+
+client.once('ready', () => {
+
+  eventLoader(client, mongo); // Fetch all eventHandlers in events/ folder.
+  commandLoader(client); // Fetch all commandHandlers in events/ folder.
+
+})
 
 client.setMaxListeners(5); // Get a warning if there are more than 1 listeners on events at any time.
-
-client.login(config.botUserToken);
