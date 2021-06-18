@@ -1,5 +1,7 @@
 const path = require('path');
 const config = require(path.join(__basedir, 'config.json'));
+const commandHandler = require('../utils/commandHandler.js');
+const Discord = require('discord.js')
 
 module.exports = async (client, mongo, message) => {
 	if (message.author.bot) { // If message author is a bot, ignore.
@@ -36,7 +38,7 @@ module.exports = async (client, mongo, message) => {
 
 	// Check if message contains wanted command prefix
 	if (isPrefixed) {
-		const [catg, cmd, ...args] = message.content.trim().slice(usedPrefix.length).trim().match(/(?:[^\s"]+|"[^"]*")+/g).map(a => a.replace(/^"(.+(?="$))"$/, '$1'))
+		const [catg, cmd, ...rawArgs] = message.content.trim().slice(usedPrefix.length).trim().match(/(?:[^\s"]+|"[^"]*")+/g).map(a => a.replace(/^"(.+(?="$))"$/, '$1'))
 
 		// Check if category is valid:
 		const resolvedCatg = client.categories[catg] || client.categories[client.categoryAliases.get(catg)];
@@ -53,27 +55,21 @@ module.exports = async (client, mongo, message) => {
 					}
 				}
 
-				//Check that the user has sufficient permissions for the command
-				if(resolvedCommand.config.permissions) {
-					if (!message.member.hasPermission('ADMINISTRATOR')) { //If user has the ADMINISTRATOR permission, skip permission checks.
-						if (resolvedCommand.config.permissions.includes('admin')) {
-							if (!message.member.roles.cache.has(guildDocument.config.admin.adminRoleID)) {
-								message.channel.send("You don't have permissions to run this command.");
-								return;
-							}
-						}
-					}
-				}
+				let arguments = rawArgs;
+				if(resolvedCommand.config.slashEnabled && !!resolvedCommand.config.slashOptions) {
+					arguments = new Discord.Collection(resolvedCommand.config.slashOptions.map((arg, i) => {
+						let value = rawArgs[i]
+						if(arg.type === 'INTEGER') value = Number.parseInt(rawArgs[i])
+						if(arg.type === 'BOOLEAN') value = (rawArgs[i].toLowerCase() === 'true')
 
-				// Check if command is a dev command, and deny it if the author is not a Developer.
-				if (resolvedCommand.config.category === 'developer') {
-					if (message.author.id !== config.developerID) {
-						return;
-					}
+						return [arg.name, { name: arg.name, value, type: arg.type}]
+					}))
 				}
+				console.log(arguments)
 
-				resolvedCommand.execute(client, message, args, guildDocument);
-				console.log(`Executing ${resolvedCommand.config.name} command for ${message.author.tag}.`);
+				//handle rest of command checking here, when message specific parsing has been done.
+				commandHandler.handleCommand(resolvedCommand, client, message, arguments, guildDocument)
+
 			} // Else console.log("Unknown command")
 		} // Else console.log(`Unknown category: ${resolvedCatg} from ${catg} in ${client.categories}`);
 	}
