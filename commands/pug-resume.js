@@ -2,8 +2,8 @@ const path = require('path');
 const dathost = require(path.join(__basedir, '/utils/dathost.js'));
 const linking = require(path.join(__basedir, '/utils/link.js'));
 
-module.exports.execute = async (client, message, args, guildDocument) => {
-	let guild = message.guild;
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
+	let guild = commandContext.guild;
 
 	guild.notLinkedPlayers = [];
 	for (player of guild.pugPlayers) {

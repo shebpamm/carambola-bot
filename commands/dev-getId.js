@@ -1,5 +1,5 @@
-module.exports.execute = async (client, message, args, guildDocument) => {
-	message.reply(`Your ID is \`${message.author.id}\``);
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
+	commandContext.reply(`Your ID is \`${commandContext.author.id}\``);
 };
 
 module.exports.config = {

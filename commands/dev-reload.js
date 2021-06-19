@@ -2,7 +2,7 @@ const path = require('path');
 const eventLoader = require(path.join(__basedir, 'utils/eventLoader.js'));
 const commandLoader = require(path.join(__basedir, 'utils/commandLoader.js'));
 
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	for (const path in require.cache) {
 		if (path.endsWith('.js') && path.includes('events')) { // Only clear *.js, not *.node
 			delete require.cache[path];
@@ -12,23 +12,23 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 	if (args.length === 0) { // If no argument is given, reload both events and commands.
 		eventLoader(client);
 		commandLoader(client);
-		message.reply('Reloaded successfully.');
+		commandContext.reply('Reloaded successfully.');
 		return;
 	}
 
 	if (args[0] === 'commands') {
 		commandLoader(client);
-		message.reply('Reloaded commands successfully.');
+		commandContext.reply('Reloaded commands successfully.');
 		return;
 	}
 
 	if (args[0] === 'events') {
 		eventLoader(client);
-		message.reply('Reloaded events successfully.');
+		commandContext.reply('Reloaded events successfully.');
 		return;
 	}
 
-	message.reply('Improper arguments. Use either `commands` or `events`');
+	commandContext.reply('Improper arguments. Use either `commands` or `events`');
 };
 
 module.exports.config = {

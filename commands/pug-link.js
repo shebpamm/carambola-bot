@@ -2,27 +2,27 @@ const path = require('path');
 const config = require(path.join(__basedir, 'config.json'));
 const radix = require(path.join(__basedir, 'utils/radix64.js'))('a0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+bcdefghijklmnopqrstuvwxyz=');
 
-module.exports.execute = async (client, message, args, guildDocument) => {
-	const shortenedID = radix.encodeInt(message.author.id);
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
+	const shortenedID = radix.encodeInt(commandContext.author.id);
 
-	client.mongo.userInfo.findOne({discordID: message.author.id}).then(userInfoDocument => {
+	client.mongo.userInfo.findOne({discordID: commandContext.author.id}).then(userInfoDocument => {
 		if (userInfoDocument) {
 			if (userInfoDocument.steam && userInfoDocument.steam.steamID) {
-				message.reply('Your account is already linked.');
+				commandContext.reply('Your account is already linked.');
 				return;
 			}
 
-			message.reply({ content: `Please log into steam here: <http://${config.authUrl}/${shortenedID}>`, ephemeral: true });
+			commandContext.reply({ content: `Please log into steam here: <http://${config.authUrl}/${shortenedID}>`, ephemeral: true });
 			return;
 		}
 
 		const newUserDoc = new client.mongo.userInfo({
 			shortenedID,
-			discordID: message.author.id,
-			discordTag: message.author.tag
+			discordID: commandContext.author.id,
+			discordTag: commandContext.author.tag
 		});
 		newUserDoc.save().then(() => {
-			message.reply({ content: `Please log into steam here: <http://${config.authUrl}/${shortenedID}>`, ephemeral: true });
+			commandContext.reply({ content: `Please log into steam here: <http://${config.authUrl}/${shortenedID}>`, ephemeral: true });
 		});
 	}).catch(error => {
 		console.log(error);

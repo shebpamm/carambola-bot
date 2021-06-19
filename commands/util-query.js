@@ -82,18 +82,18 @@ const removeInterestedPlayer = (queryObject, user) => {
 	queryObject.queryData.interestedPlayers = queryObject.queryData.interestedPlayers.filter(u => u.id !== user.id); // A bit ugly but the array is never going to be big :shrug:
 };
 
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	if (!args.get('title')?.value) {
-		if(message.author.queries && Object.keys(message.author.queries).length > 0) {
-			message.reply(`You have ${Object.keys(message.author.queries).length} queries active. They cancel after a day.`);
+		if(commandContext.author.queries && Object.keys(commandContext.author.queries).length > 0) {
+			commandContext.reply(`You have ${Object.keys(commandContext.author.queries).length} queries active. They cancel after a day.`);
 		} else {
-			message.reply("You have no queries active. Queries last for a day.");
+			commandContext.reply("You have no queries active. Queries last for a day.");
 		}
 		return
 	}
 
 	if (args.get('title').value.length > 256) {
-		message.reply("Too long title. Max length by discord is 256 characters.");
+		commandContext.reply("Too long title. Max length by discord is 256 characters.");
 		return;
 	}
 
@@ -106,8 +106,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 	}
 
 
-	message.reply({ content: 'Creating query...', ephemeral: true }).then( res => {
-		createQueryMessageEmbed(message, args.get('title').value, maxSigns).then( queryMessage => {
+	commandContext.reply({ content: 'Creating query...', ephemeral: true }).then( res => {
+		createQueryMessageEmbed(commandContext, args.get('title').value, maxSigns).then( queryMessage => {
 			queryMessage.react('👍').then(queryMessageReaction => {
 				// Create a reaction collector after the message has been sent.
 				const queryObject = {
@@ -119,8 +119,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 						'interestedPlayers' : []
 					}
 				};
-				message.author.queries = message.author.queries || {};
-				message.author.queries[queryMessage.id] = queryObject
+				commandContext.author.queries = commandContext.author.queries || {};
+				commandContext.author.queries[queryMessage.id] = queryObject
 
 				queryObject.reactionCollector = createQueryReactionCollector(queryMessage, queryObject);
 			});

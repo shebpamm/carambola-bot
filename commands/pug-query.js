@@ -1,17 +1,17 @@
 const Discord = require('discord.js');
 
-const isConfigured = (guildDocument, message) => { // Check if proper roles and channel have been assigned.
-	return message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '')
-	&& message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID)
-	&& (!guildDocument.config.pugs.useActiveRole || message.guild.roles.fetch(guildDocument.config.pugs.pugActiveRoleID || ''));
+const isConfigured = (guildDocument, commandContext) => { // Check if proper roles and channel have been assigned.
+	return commandContext.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '')
+	&& commandContext.guild.channels.resolve(guildDocument.config.pugs.pugChannelID)
+	&& (!guildDocument.config.pugs.useActiveRole || commandContext.guild.roles.fetch(guildDocument.config.pugs.pugActiveRoleID || ''));
 };
 
-const createPugQueryMessageEmbed = async (message, guildDocument) => {
-	const pugRole = await message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
-	const pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+const createPugQueryMessageEmbed = async (commandContext, guildDocument) => {
+	const pugRole = await commandContext.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
+	const pugChannel = await commandContext.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
 	const queryEmbed = new Discord.MessageEmbed()
 		.setColor(0xFFCA26)
-		.setTitle(`${message.guild.pugQueryAuthor.username} is interested in doing a 5v5!`)
+		.setTitle(`${commandContext.guild.pugQueryAuthor.username} is interested in doing a 5v5!`)
 		.setDescription(`If you're interested, react with :thumbsup: below!`)
 		.addFields(
 			{ name: 'Player count:', value: '0/10' }
@@ -83,30 +83,30 @@ const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
 	return collector;
 };
 
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 		if (guildDocument.pugs.pugStates.pugQueryActive) {
-			message.reply(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
+			commandContext.reply(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
 			return
 		}
 
-		if (isConfigured(guildDocument, message)) { // Check if the bot has been given a proper channel to post in and a role to mention.
+		if (isConfigured(guildDocument, commandContext)) { // Check if the bot has been given a proper channel to post in and a role to mention.
 			guildDocument.pugs.lastCreatedAt = undefined;
 			await guildDocument.clearInterestedPlayers();
 
-			message.guild.pugQueryAuthor = message.author;
+			commandContext.guild.pugQueryAuthor = commandContext.author;
 
-			createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { // Create a new embed and send it.
-				message.guild.pugQueryMessage = queryMessage;
+			createPugQueryMessageEmbed(commandContext, guildDocument).then(queryMessage => { // Create a new embed and send it.
+				commandContext.guild.pugQueryMessage = queryMessage;
 				queryMessage.react('👍').then(queryMessageReaction => {
 					// Create a reaction collector after the message has been sent.
-					message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
+					commandContext.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
 				});
 			});
 			guildDocument.pugs.pugStates.pugQueryActive = true;
 			guildDocument.save();
-			message.reply({ content: 'Query created.', ephemeral: true })
+			commandContext.reply({ content: 'Query created.', ephemeral: true })
 		} else {
-			message.reply(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
+			commandContext.reply(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
 		}
 
 };

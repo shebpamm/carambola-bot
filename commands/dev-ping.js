@@ -1,5 +1,5 @@
-module.exports.execute = async (client, message, args, guildDocument) => {
-	message.reply('Pong!');
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
+	commandContext.reply('Pong!');
 };
 
 module.exports.config = {

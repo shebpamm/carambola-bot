@@ -6,7 +6,7 @@ const clean = text => { // Sanitize mentions
 	return text;
 };
 
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	try {
 		const code = args.join(' ');
 		let evaled = eval(code);
@@ -15,9 +15,9 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			evaled = require('util').inspect(evaled);
 		}
 
-		message.channel.send(clean(evaled), {code: 'xl'});
+		commandContext.channel.send(clean(evaled), {code: 'xl'});
 	} catch (error) {
-		message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(error)}\n\`\`\``);
+		commandContext.channel.send(`\`ERROR\` \`\`\`xl\n${clean(error)}\n\`\`\``);
 	}
 };
 

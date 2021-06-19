@@ -155,13 +155,13 @@ const createMapEmbed = (guild, guildDocument) => {
 	return guild.pugChannel.send({embeds: [mapEmbedTemplate]});
 };
 
-const updateMapEmbed = async (guild, guildDocument, message) => {
+const updateMapEmbed = async (guild, guildDocument, commandContext) => {
 	if (guild.choosingTeam === 1) {
-		guild.teamVetos.one.push(message.content.trim().replace(' ', '_'));
+		guild.teamVetos.one.push(commandContext.content.trim().replace(' ', '_'));
 		guild.choosingTeam = 2;
 		guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.two.captain.id).user;
 	} else {
-		guild.teamVetos.two.push(message.content.trim().replace(' ', '_'));
+		guild.teamVetos.two.push(commandContext.content.trim().replace(' ', '_'));
 		guild.choosingTeam = 1;
 		guild.choosingCaptain = guild.members.resolve(guildDocument.pugs.teams.one.captain.id).user;
 	}
@@ -223,8 +223,8 @@ const updateMapEmbed = async (guild, guildDocument, message) => {
 
 module.exports.startMapVeto = startMapVeto;
 
-const updateTeamPickEmbed = (guild, guildDocument, message) => {
-	guildDocument.addToTeam(guild.choosingTeam, message.mentions.users);
+const updateTeamPickEmbed = (guild, guildDocument, commandContext) => {
+	guildDocument.addToTeam(guild.choosingTeam, commandContext.mentions.users);
 	guild.teamPickStep++;
 
 	if (guild.choosingTeam === 1) {
@@ -323,11 +323,11 @@ const doTeamPicks = (guild, guildDocument) => {
 };
 
 // TODO: Jesus refactor this sometime. Definitely.
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	if (guildDocument.pugs.pugStates.pugQueryActive) {
-		const pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
-		message.guild.pugChannel = pugChannel;
-		message.guild.movedPugPlayers = [];
+		const pugChannel = await commandContext.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
+		commandContext.guild.pugChannel = pugChannel;
+		commandContext.guild.movedPugPlayers = [];
 
 		if (guildDocument.pugs.pugQuery.interestedPlayersCount >= guildDocument.pugs.pugQuery.targetPlayerCount || args.get('force')?.value) {
 			// Pug querying is now stopped as the next stage starts.
@@ -338,66 +338,66 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 
 			await Promise.all([ // Await while channel has been created and players have been fetched.
 				// Fetch all players that are going to be in the game and store them into the guild object.
-				Promise.all(guildDocument.pugs.pugQuery.interestedPlayers.slice(0, 10).map(p => message.guild.members.fetch(p.id))).then(pugPlayers => { // Because fetch returns a promise, use Promise.all and wait for them to resolve.
-					message.guild.pugPlayers = pugPlayers;
+				Promise.all(guildDocument.pugs.pugQuery.interestedPlayers.slice(0, 10).map(p => commandContext.guild.members.fetch(p.id))).then(pugPlayers => { // Because fetch returns a promise, use Promise.all and wait for them to resolve.
+					commandContext.guild.pugPlayers = pugPlayers;
 				}),
 				// Create a new channel called Scrim Lobby and then store a reference into the guild object.
-				createPugLobby(message, guildDocument).then(channel => {
-					message.guild.pugLobbyChannel = channel;
+				createPugLobby(commandContext, guildDocument).then(channel => {
+					commandContext.guild.pugLobbyChannel = channel;
 				})
 			]);
 			// Iterate moving players one at a time as doing it async seems to mess with discord api.
-			for (const member of message.guild.pugPlayers) {
-				await member.edit({channel: message.guild.pugLobbyChannel})
+			for (const member of commandContext.guild.pugPlayers) {
+				await member.edit({channel: commandContext.guild.pugLobbyChannel})
 					.then(member => {
 						// Add successfully moved players to an array
-						message.guild.movedPugPlayers.push(member);
+						commandContext.guild.movedPugPlayers.push(member);
 					})
 					.catch(error => error);
 			}
 
 			// Make a list of people missing by eliminating all players that have been moved.
-			message.guild.missingPlayers = message.guild.pugPlayers.filter(p => !message.guild.movedPugPlayers.map(c => c.id).includes(p.id));
+			commandContext.guild.missingPlayers = commandContext.guild.pugPlayers.filter(p => !commandContext.guild.movedPugPlayers.map(c => c.id).includes(p.id));
 
-			message.guild.cannotContactPlayers = [];
-			for (player of message.guild.pugPlayers) {
-				await linking.getUserInfoDocument(message.client.mongo, player).then(async userInfoDocument => {
+			commandContext.guild.cannotContactPlayers = [];
+			for (player of commandContext.guild.pugPlayers) {
+				await linking.getUserInfoDocument(commandContext.client.mongo, player).then(async userInfoDocument => {
 					if ( !linking.isUserLinked(userInfoDocument) ) {
 						if(!userInfoDocument) {
-							userInfoDocument = await linking.createUserInfoDocument(message.client.mongo, player);
+							userInfoDocument = await linking.createUserInfoDocument(commandContext.client.mongo, player);
 						}
 						return player.send(`Hi there! Looks like you're attending a pug but haven't linked your steam yet.
 Please log into steam here: <${linking.getUserLinkingUrl(userInfoDocument)}>`).catch(error => {
-							if(error.code === 50007) message.guild.cannotContactPlayers.push(player)
+							if(error.code === 50007) commandContext.guild.cannotContactPlayers.push(player)
 							//console.log(message.guild.cannotContactPlayers)
 						})
 					}
 				})
 			}
 
-			console.log(message.guild.cannotContactPlayers);
-			if(message.guild.cannotContactPlayers.length !== 0) {
-				pugChannel.send(`Could not DM the following players: ${message.guild.cannotContactPlayers.join(' ')}
+			console.log(commandContext.guild.cannotContactPlayers);
+			if(commandContext.guild.cannotContactPlayers.length !== 0) {
+				pugChannel.send(`Could not DM the following players: ${commandContext.guild.cannotContactPlayers.join(' ')}
 Please check your Privacy & Safety settings.`);
 			}
 
-			if (message.guild.missingPlayers.length === 0) {
+			if (commandContext.guild.missingPlayers.length === 0) {
 				pugChannel.send('Created a new lobby and moved everyone.');
-				startCaptainSelect(message.guild, guildDocument);
+				startCaptainSelect(commandContext.guild, guildDocument);
 			} else {
-				pugChannel.send(`Created a new lobby and moved who I could. ${message.guild.missingPlayers.join(' ')} would you please join.`);
+				pugChannel.send(`Created a new lobby and moved who I could. ${commandContext.guild.missingPlayers.join(' ')} would you please join.`);
 
 				// Listen to voiceStateUpdates so we can track players joining the lobby.
 				// Bind this specific listener to this guilds object so that each guild has their own listener.
-				message.guild.voiceStateListener = onVoiceStateUpdate.bind(null, message.guild, guildDocument);
-				client.on('voiceStateUpdate', message.guild.voiceStateListener);
+				commandContext.guild.voiceStateListener = onVoiceStateUpdate.bind(null, commandContext.guild, guildDocument);
+				client.on('voiceStateUpdate', commandContext.guild.voiceStateListener);
 			}
 			// Command execution ends here, game flow continues after voiceState marks everyone on the lobby or a new command with force is issued.
 		} else {
-			message.reply(`Not enough participants. ${guildDocument.pugs.pugQuery.interestedPlayersCount}/${guildDocument.pugs.pugQuery.targetPlayerCount}`);
+			commandContext.reply(`Not enough participants. ${guildDocument.pugs.pugQuery.interestedPlayersCount}/${guildDocument.pugs.pugQuery.targetPlayerCount}`);
 		}
 	} else {
-		message.reply('No pug active. Start a query with `pug query new`');
+		commandContext.reply('No pug active. Start a query with `pug query new`');
 	}
 };
 

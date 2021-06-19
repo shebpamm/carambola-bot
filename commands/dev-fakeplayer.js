@@ -1,6 +1,6 @@
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	if (args[0] === 'query') {
-		const players = message.mentions.users.map(user => {
+		const players = commandContext.mentions.users.map(user => {
 			return {id: user.id, username: user.username};
 		});
 		for (const player of players) {

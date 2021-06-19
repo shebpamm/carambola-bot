@@ -1,5 +1,5 @@
-module.exports.execute = async (client, message, args, guildDocument) => {
-	message.reply(args.array().map(x => x.value).join(', ') + "​");
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
+	commandContext.reply(args.array().map(x => x.value).join(', ') + "​");
 };
 
 module.exports.config = {

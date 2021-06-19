@@ -1,28 +1,28 @@
-module.exports.execute = async (client, message, args, guildDocument) => {
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
 
 	if(!guildDocument.pugs.pugStates.pugQueryActive) {
-		message.reply("No query active.");
+		commandContext.reply("No query active.");
 		return;
 	}
 
 	if(!args.get('user').value) {
-		message.reply("Please mention user to kick.");
+		commandContext.reply("Please mention user to kick.");
 		return;
 	}
 
 	if(args.get('user').value === message.guild.pugQueryAuthor?.id) {
-		message.reply("Can't remove query author.")
+		commandContext.reply("Can't remove query author.")
 		return;
 	}
 
 	//Check that some dumbass doesn't try to remove the bot itself.
-	if(args.get('user').value === message.client.user.id) {
-		message.reply("_bruh_")
+	if(args.get('user').value === commandContext.client.user.id) {
+		commandContext.reply("_bruh_")
 		return;
 	}
 
-	message.guild.pugQueryMessage.reactions.cache.get("👍").users.remove(args.get('user').value);
-	message.reply('Player kicked.')
+	commandContext.guild.pugQueryMessage.reactions.cache.get("👍").users.remove(args.get('user').value);
+	commandContext.reply('Player kicked.')
 };
 
 

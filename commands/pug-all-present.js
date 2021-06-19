@@ -1,8 +1,8 @@
 const pugStart = require('./pug-start.js');
 
-module.exports.execute = async (client, message, args, guildDocument) => {
-	client.removeListener('voiceStateUpdate', message.guild.voiceStateListener);
-	pugStart.startCaptainSelect(message.guild, guildDocument);
+module.exports.execute = async (client, commandContext, args, guildDocument) => {
+	client.removeListener('voiceStateUpdate', commandContext.guild.voiceStateListener);
+	pugStart.startCaptainSelect(commandContext.guild, guildDocument);
 };
 
 // Even though name is pug_allPresent, command is a dev command.
