@@ -58,7 +58,7 @@ const reactionCollectorFilter = (reaction, user) => {
 const onQueryReactionCollect = async (guildDocument, reaction, user) => {
 	//console.log(`${user.tag} reacted! ${reaction.message}`);
 	if(guildDocument.config.pugs.useActiveRole) {
-		reaction.message.guild.member(user).roles.add(guildDocument.config.pugs.pugActiveRoleID);
+		reaction.message.guild.members.resolve(user).roles.add(guildDocument.config.pugs.pugActiveRoleID);
 	}
 	await guildDocument.addInterestedPlayer(user);
 	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
@@ -68,7 +68,7 @@ const onQueryReactionCollect = async (guildDocument, reaction, user) => {
 const onQueryReactionRemove = async (guildDocument, reaction, user) => {
 	//console.log(`${user.tag} un-reacted!`);
 	if(guildDocument.config.pugs.useActiveRole) {
-		reaction.message.guild.member(user).roles.remove(guildDocument.config.pugs.pugActiveRoleID);
+		reaction.message.guild.members.resolve(user).roles.remove(guildDocument.config.pugs.pugActiveRoleID);
 	}
 
 	await guildDocument.removeInterestedPlayer(user);
