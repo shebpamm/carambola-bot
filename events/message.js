@@ -65,7 +65,6 @@ module.exports = async (client, mongo, message) => {
 						return [arg.name, { name: arg.name, value, type: arg.type}]
 					}))
 				}
-				console.log(arguments)
 
 				//handle rest of command checking here, when message specific parsing has been done.
 				commandHandler.handleCommand(resolvedCommand, client, message, arguments, guildDocument)
