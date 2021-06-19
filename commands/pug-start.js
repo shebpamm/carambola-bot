@@ -213,7 +213,7 @@ const updateMapEmbed = async (guild, guildDocument, commandContext) => {
 			guild.pugChannel.send(`Players ${guild.notLinkedPlayers.join(' ')} have not yet linked their steam. Please type \`pug resume\` when everyone is linked.`);
 		} else {
 			const matchIP = await dathost.newMatch(guild, guildDocument);
-			guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\`\n**Or open:** <steam://${matchIP}>`);
+			guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\`\n**Or open:** <steam://connect/${matchIP}>`)
 		}
 	}
 
