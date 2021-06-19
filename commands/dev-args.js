@@ -1,5 +1,5 @@
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
-	commandContext.reply(args.array().map(x => x.value).join(', ') + "​");
+	commandContext.reply(args.array().map(x => x.value).join(', ') + '​');
 };
 
 module.exports.config = {
@@ -13,12 +13,12 @@ module.exports.config = {
 		name: 'arg1',
 		type: 'STRING',
 		description: 'First arg',
-		required: true,
+		required: true
 	},
 	{
 		name: 'arg2',
 		type: 'STRING',
 		description: 'Second arg',
-		required: false,
+		required: false
 	}]
 };

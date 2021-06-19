@@ -1,13 +1,11 @@
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
-	if(guildDocument.pugs.pugStates.pugQueryActive) {
-		commandContext.guild.pugQueryAuthor = commandContext.author
+	if (guildDocument.pugs.pugStates.pugQueryActive) {
+		commandContext.guild.pugQueryAuthor = commandContext.author;
 		commandContext.reply(`${commandContext.author} is now the author of this query.`);
 	} else {
-		commandContext.reply("No query active.");
+		commandContext.reply('No query active.');
 	}
 };
-
-
 
 module.exports.config = {
 	name: 'hijack',

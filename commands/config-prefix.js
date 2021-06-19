@@ -8,7 +8,7 @@ module.exports.execute = async (client, commandContext, args, guildDocument) => 
 	} else { // If there are arguments, use the first one as a new prefix.
 		guildDocument.config.usedPrefix = args.get('prefix').value;
 		guildDocument.save(); // Flush to db
-		commandContext.reply(`**Prefix changed successfully.**`)
+		commandContext.reply('**Prefix changed successfully.**');
 	}
 };
 
@@ -19,11 +19,11 @@ module.exports.config = {
 	categoryAliases: ['cfg'],
 	commandAliases: ['pfx'],
 	slashEnabled: true,
-	slashOptions:[{
+	slashOptions: [{
 		name: 'prefix',
 		type: 'STRING',
 		description: 'The prefix to use',
-		required: false,
+		required: false
 	}]
 
 };

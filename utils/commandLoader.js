@@ -36,33 +36,36 @@ module.exports = client => {
 		console.log(`Loaded Command: ${cmd.config.name}`);
 	}
 
-		setSlashCommands(client)
+	setSlashCommands(client);
 };
 
-//Interate categories and commands to create a object to send to api for slash commands
-const setSlashCommands =  async (client) => {
-	client.slashCommands = {}
-	let slashData = []
+// Interate categories and commands to create a object to send to api for slash commands
+const setSlashCommands = async client => {
+	client.slashCommands = {};
+	let slashData = [];
 
 	slashData = Object.entries(client.categories)
-	.filter(([key, val ]) => Array.from(val.commands) //Filter the list to iterate by checking if at least one command contains slashEnabled
-	.some(([key, val]) => val.config.slashEnabled))
-	.map(([catKey, category]) => { //Iterate Category
-		return {
-			'name': catKey,
-			'description': 'category-test',
-			'options': Array.from(category.commands, ([cmdKey, command]) => { //Iterate Command, functions same as map()
-				if(!command.config.slashEnabled) return
+		.filter(([key, value]) => Array.from(value.commands) // Filter the list to iterate by checking if at least one command contains slashEnabled
+			.some(([key, value]) => value.config.slashEnabled))
+		.map(([catKey, category]) => { // Iterate Category
+			return {
+				name: catKey,
+				description: 'category-test',
+				options: Array.from(category.commands, ([cmdKey, command]) => { // Iterate Command, functions same as map()
+					if (!command.config.slashEnabled) {
+						return;
+					}
 
-				return {
-					'name': command.config.name,
-					'description': command.config.description,
-					'type': 'SUB_COMMAND',
-					'options': command.config.slashOptions
-				}
-			}).filter(x => x)
-		}
-	})
+					return {
+						name: command.config.name,
+						description: command.config.description,
+						type: 'SUB_COMMAND',
+						options: command.config.slashOptions
+					};
+				}).filter(x => x)
+			};
+		});
 	const commands = await client.application.commands.set(slashData);
-	client.slashData = slashData
-}
+	client.slashData = slashData;
+	client.commands = commands;
+};

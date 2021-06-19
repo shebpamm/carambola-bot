@@ -4,7 +4,7 @@ const createQueryMessageEmbed = async (message, description, maxSigns = 99) => {
 	const queryEmbed = {
 		color: 0xFFCA26,
 		title: `${description}`,
-		description: `If you're interested, react with :thumbsup: below!`,
+		description: 'If you\'re interested, react with :thumbsup: below!',
 		fields: [
 			{
 				name: 'Player count:', value: `0/${maxSigns}`
@@ -18,7 +18,7 @@ const updateQueryMessageEmbed = async (embedMessage, queryObject) => {
 	const queryEmbedTemplate = {
 		color: 0xFFCA26,
 		title: `${queryObject.title}`,
-		description: `If you're interested, react with :thumbsup: below!`,
+		description: 'If you\'re interested, react with :thumbsup: below!',
 		fields: [
 			{
 				name: 'Player count:', value: `${queryObject.queryData.interestedPlayersCount}/${queryObject.queryData.targetPlayerCount}`
@@ -39,32 +39,32 @@ const updateQueryMessageEmbed = async (embedMessage, queryObject) => {
 	const queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
 	// QueryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
 
-	return embedMessage.edit({ embeds: [queryEmbed]});
+	return embedMessage.edit({embeds: [queryEmbed]});
 };
 
-const endQueryMessageEmbed = (embed) => {
+const endQueryMessageEmbed = embed => {
 	const finalEmbed = new Discord.MessageEmbed(embed.embeds[0]).setTitle('This query has ended.');
-	return embed.edit({ embeds: [finalEmbed]});
-}
+	return embed.edit({embeds: [finalEmbed]});
+};
 
 const reactionCollectorFilter = (reaction, user) => {
 	return reaction.emoji.name === '👍' && !user.bot; // Is a thumbsup, cant see it on my os lol.
 };
 
 const onQueryReactionCollect = (queryMessage, queryObject, reaction, user) => {
-	//console.log(`${user.tag} reacted! ${reaction.message}`);
+	// Console.log(`${user.tag} reacted! ${reaction.message}`);
 	addInterestedPlayer(queryObject, user);
 	updateQueryMessageEmbed(reaction.message, queryObject);
 };
 
 const onQueryReactionRemove = (queryMessage, queryObject, reaction, user) => {
-	//console.log(`${user.tag} un-reacted!`);
+	// Console.log(`${user.tag} un-reacted!`);
 	removeInterestedPlayer(queryObject, user);
 	updateQueryMessageEmbed(reaction.message, queryObject);
 };
 
 const createQueryReactionCollector = (queryMessage, queryObject) => {
-	const collector = queryMessage.createReactionCollector(reactionCollectorFilter, {dispose: true, time: 24*60*60*1000});
+	const collector = queryMessage.createReactionCollector(reactionCollectorFilter, {dispose: true, time: 24 * 60 * 60 * 1000});
 	collector.on('collect', onQueryReactionCollect.bind(null, queryMessage, queryObject));
 	collector.on('remove', onQueryReactionRemove.bind(null, queryMessage, queryObject));
 	collector.on('end', endQueryMessageEmbed.bind(null, queryMessage));
@@ -84,48 +84,49 @@ const removeInterestedPlayer = (queryObject, user) => {
 
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	if (!args.get('title')?.value) {
-		if(commandContext.author.queries && Object.keys(commandContext.author.queries).length > 0) {
+		if (commandContext.author.queries && Object.keys(commandContext.author.queries).length > 0) {
 			commandContext.reply(`You have ${Object.keys(commandContext.author.queries).length} queries active. They cancel after a day.`);
 		} else {
-			commandContext.reply("You have no queries active. Queries last for a day.");
+			commandContext.reply('You have no queries active. Queries last for a day.');
 		}
-		return
-	}
 
-	if (args.get('title').value.length > 256) {
-		commandContext.reply("Too long title. Max length by discord is 256 characters.");
 		return;
 	}
 
-	if (!args.get('players')?.value) {
-		maxSigns = 99;
-	} else {
-		parsedMax = Number.parseInt(args.get('players').value);
-		if (Number.isNaN(parsedMax) || parsedMax > 100 || parsedMax < 1) maxSigns = 99
-		else maxSigns =  parsedMax
+	if (args.get('title').value.length > 256) {
+		commandContext.reply('Too long title. Max length by discord is 256 characters.');
+		return;
 	}
 
+	let maxSigns;
 
-	commandContext.reply({ content: 'Creating query...', ephemeral: true }).then( res => {
-		createQueryMessageEmbed(commandContext, args.get('title').value, maxSigns).then( queryMessage => {
+	if (args.get('players')?.value) {
+		const parsedMax = Number.parseInt(args.get('players').value, 10);
+		maxSigns = Number.isNaN(parsedMax) || parsedMax > 100 || parsedMax < 1 ? 99 : parsedMax;
+	} else {
+		maxSigns = 99;
+	}
+
+	commandContext.reply({content: 'Creating query...', ephemeral: true}).then(result => {
+		createQueryMessageEmbed(commandContext, args.get('title').value, maxSigns).then(queryMessage => {
 			queryMessage.react('👍').then(queryMessageReaction => {
 				// Create a reaction collector after the message has been sent.
 				const queryObject = {
-					'message' : queryMessage,
-					'title' : args.get('title').value,
-					'queryData' : {
-						'targetPlayerCount' : maxSigns,
-						'interestedPlayersCount' : 0,
-						'interestedPlayers' : []
+					message: queryMessage,
+					title: args.get('title').value,
+					queryData: {
+						targetPlayerCount: maxSigns,
+						interestedPlayersCount: 0,
+						interestedPlayers: []
 					}
 				};
 				commandContext.author.queries = commandContext.author.queries || {};
-				commandContext.author.queries[queryMessage.id] = queryObject
+				commandContext.author.queries[queryMessage.id] = queryObject;
 
 				queryObject.reactionCollector = createQueryReactionCollector(queryMessage, queryObject);
 			});
-		})
-	})
+		});
+	});
 };
 
 module.exports.config = {
@@ -139,12 +140,12 @@ module.exports.config = {
 		name: 'title',
 		type: 'STRING',
 		description: 'Title for the query',
-		required: true,
+		required: true
 	},
 	{
 		name: 'players',
 		type: 'INTEGER',
 		description: 'Max amount of participants',
-		required: false,
+		required: false
 	}]
 };

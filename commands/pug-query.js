@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
 
 const isConfigured = (guildDocument, commandContext) => { // Check if proper roles and channel have been assigned.
-	return commandContext.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '')
-	&& commandContext.guild.channels.resolve(guildDocument.config.pugs.pugChannelID)
-	&& (!guildDocument.config.pugs.useActiveRole || commandContext.guild.roles.fetch(guildDocument.config.pugs.pugActiveRoleID || ''));
+	return commandContext.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '') &&
+	commandContext.guild.channels.resolve(guildDocument.config.pugs.pugChannelID) &&
+	(!guildDocument.config.pugs.useActiveRole || commandContext.guild.roles.fetch(guildDocument.config.pugs.pugActiveRoleID || ''));
 };
 
 const createPugQueryMessageEmbed = async (commandContext, guildDocument) => {
@@ -12,9 +12,9 @@ const createPugQueryMessageEmbed = async (commandContext, guildDocument) => {
 	const queryEmbed = new Discord.MessageEmbed()
 		.setColor(0xFFCA26)
 		.setTitle(`${commandContext.guild.pugQueryAuthor.username} is interested in doing a 5v5!`)
-		.setDescription(`If you're interested, react with :thumbsup: below!`)
+		.setDescription('If you\'re interested, react with :thumbsup: below!')
 		.addFields(
-			{ name: 'Player count:', value: '0/10' }
+			{name: 'Player count:', value: '0/10'}
 		);
 	return pugChannel.send({
 		...(guildDocument.config.pugs.pugPingOnQuery) && {content: `${pugRole}`},
@@ -23,11 +23,10 @@ const createPugQueryMessageEmbed = async (commandContext, guildDocument) => {
 };
 
 const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
-	const pugRole = await embedMessage.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
 	const queryEmbedTemplate = {
 		color: 0xFFCA26,
 		title: `${embedMessage.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
-		description: `If you're interested, react with :thumbsup: below!`,
+		description: 'If you\'re interested, react with :thumbsup: below!',
 		fields: [
 			{
 				name: 'Player count:', value: `${guildDocument.pugs.pugQuery.interestedPlayersCount}/10`
@@ -48,7 +47,7 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
 	const queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
 	// QueryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
 
-	return embedMessage.edit({ embeds: [queryEmbed] });
+	return embedMessage.edit({embeds: [queryEmbed]});
 };
 
 const reactionCollectorFilter = (reaction, user) => {
@@ -56,23 +55,24 @@ const reactionCollectorFilter = (reaction, user) => {
 };
 
 const onQueryReactionCollect = async (guildDocument, reaction, user) => {
-	//console.log(`${user.tag} reacted! ${reaction.message}`);
-	if(guildDocument.config.pugs.useActiveRole) {
+	// Console.log(`${user.tag} reacted! ${reaction.message}`);
+	if (guildDocument.config.pugs.useActiveRole) {
 		reaction.message.guild.members.resolve(user).roles.add(guildDocument.config.pugs.pugActiveRoleID);
 	}
+
 	await guildDocument.addInterestedPlayer(user);
-	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
+	const refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); // Fetch the document again from mongo so that updates show.
 	return updatePugQueryMessageEmbed(reaction.message, refreshedDocument);
 };
 
 const onQueryReactionRemove = async (guildDocument, reaction, user) => {
-	//console.log(`${user.tag} un-reacted!`);
-	if(guildDocument.config.pugs.useActiveRole) {
+	// Console.log(`${user.tag} un-reacted!`);
+	if (guildDocument.config.pugs.useActiveRole) {
 		reaction.message.guild.members.resolve(user).roles.remove(guildDocument.config.pugs.pugActiveRoleID);
 	}
 
 	await guildDocument.removeInterestedPlayer(user);
-	refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); //Fetch the document again from mongo so that updates show.
+	const refreshedDocument = await guildDocument.model(guildDocument.constructor.modelName).findOne({_id: guildDocument.id}); // Fetch the document again from mongo so that updates show.
 	return updatePugQueryMessageEmbed(reaction.message, refreshedDocument);
 };
 
@@ -84,31 +84,30 @@ const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
 };
 
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
-		if (guildDocument.pugs.pugStates.pugQueryActive) {
-			commandContext.reply(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
-			return
-		}
+	if (guildDocument.pugs.pugStates.pugQueryActive) {
+		commandContext.reply(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
+		return;
+	}
 
-		if (isConfigured(guildDocument, commandContext)) { // Check if the bot has been given a proper channel to post in and a role to mention.
-			guildDocument.pugs.lastCreatedAt = undefined;
-			await guildDocument.clearInterestedPlayers();
+	if (isConfigured(guildDocument, commandContext)) { // Check if the bot has been given a proper channel to post in and a role to mention.
+		guildDocument.pugs.lastCreatedAt = undefined;
+		await guildDocument.clearInterestedPlayers();
 
-			commandContext.guild.pugQueryAuthor = commandContext.author;
+		commandContext.guild.pugQueryAuthor = commandContext.author;
 
-			createPugQueryMessageEmbed(commandContext, guildDocument).then(queryMessage => { // Create a new embed and send it.
-				commandContext.guild.pugQueryMessage = queryMessage;
-				queryMessage.react('👍').then(queryMessageReaction => {
-					// Create a reaction collector after the message has been sent.
-					commandContext.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
-				});
+		createPugQueryMessageEmbed(commandContext, guildDocument).then(queryMessage => { // Create a new embed and send it.
+			commandContext.guild.pugQueryMessage = queryMessage;
+			queryMessage.react('👍').then(queryMessageReaction => {
+				// Create a reaction collector after the message has been sent.
+				commandContext.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
 			});
-			guildDocument.pugs.pugStates.pugQueryActive = true;
-			guildDocument.save();
-			commandContext.reply({ content: 'Query created.', ephemeral: true })
-		} else {
-			commandContext.reply(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
-		}
-
+		});
+		guildDocument.pugs.pugStates.pugQueryActive = true;
+		guildDocument.save();
+		commandContext.reply({content: 'Query created.', ephemeral: true});
+	} else {
+		commandContext.reply(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
+	}
 };
 
 module.exports.config = {

@@ -4,24 +4,24 @@ const radix = require(path.join(__basedir, 'utils/radix64.js'))('a0123456789ABCD
 
 module.exports.getUserInfoDocument = getUserInfoDocument;
 async function getUserInfoDocument(mongo, user) {
-	return mongo.userInfo.findOne({discordID: user.id})
+	return mongo.UserInfo.findOne({discordID: user.id});
 }
 
 module.exports.isUserLinked = isUserLinked;
 function isUserLinked(userInfoDocument) {
-	return (userInfoDocument && userInfoDocument.steam && userInfoDocument.steam.steamID)
+	return (userInfoDocument && userInfoDocument.steam && userInfoDocument.steam.steamID);
 }
 
 module.exports.getUserLinkingUrl = getUserLinkingUrl;
 function getUserLinkingUrl(userInfoDocument) {
-	return `http://${config.authUrl}/${userInfoDocument.shortenedID}`
+	return `http://${config.authUrl}/${userInfoDocument.shortenedID}`;
 }
 
 module.exports.createUserInfoDocument = createUserInfoDocument;
 function createUserInfoDocument(mongo, user) {
 	const shortenedID = radix.encodeInt(user.id);
 
-	const newUserDoc = new mongo.userInfo({
+	const newUserDoc = new mongo.UserInfo({
 		shortenedID,
 		discordID: user.id,
 		discordTag: user.tag
@@ -32,7 +32,7 @@ function createUserInfoDocument(mongo, user) {
 module.exports.execute = async (client, message, args, guildDocument) => {
 	const shortenedID = radix.encodeInt(message.author.id);
 
-	client.mongo.userInfo.findOne({discordID: message.author.id}).then(userInfoDocument => {
+	client.mongo.UserInfo.findOne({discordID: message.author.id}).then(userInfoDocument => {
 		if (userInfoDocument) {
 			if (userInfoDocument.steam && userInfoDocument.steam.steamID) {
 				message.channel.send('Your account is already linked.');
@@ -43,7 +43,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			return;
 		}
 
-		const newUserDoc = new client.mongo.userInfo({
+		const newUserDoc = new client.mongo.UserInfo({
 			shortenedID,
 			discordID: message.author.id,
 			discordTag: message.author.tag

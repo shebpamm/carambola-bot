@@ -19,7 +19,7 @@ const guildSchema = new mongoose.Schema({
 			pugCaptainPickActive: {type: Boolean, default: false},
 			pugTeamPickActive: {type: Boolean, default: false},
 			pugMapSelectActive: {type: Boolean, default: false},
-			pugGameActive: {type: Boolean, default: false},
+			pugGameActive: {type: Boolean, default: false}
 		},
 		teams: {
 			one: {
@@ -62,17 +62,17 @@ const guildSchema = new mongoose.Schema({
 // Adds players to the array and keeps track of the count.
 guildSchema.methods.addInterestedPlayer = function (user) {
 	return Promise.all([
-		this.updateOne({$inc:{'pugs.pugQuery.interestedPlayersCount':1}}).exec(),
-		this.updateOne({$push:{'pugs.pugQuery.interestedPlayers': {id: user.id, username: user.username} }}).exec(),
-	])
+		this.updateOne({$inc: {'pugs.pugQuery.interestedPlayersCount': 1}}).exec(),
+		this.updateOne({$push: {'pugs.pugQuery.interestedPlayers': {id: user.id, username: user.username}}}).exec()
+	]);
 };
 
 // Removes players from the array and keeps track of the count.
 guildSchema.methods.removeInterestedPlayer = function (user) {
 	return Promise.all([
-		this.updateOne({$inc:{'pugs.pugQuery.interestedPlayersCount':-1}}).exec(),
-		this.updateOne({$pull:{'pugs.pugQuery.interestedPlayers': {id: user.id, username: user.username} }}).exec()
-	])
+		this.updateOne({$inc: {'pugs.pugQuery.interestedPlayersCount': -1}}).exec(),
+		this.updateOne({$pull: {'pugs.pugQuery.interestedPlayers': {id: user.id, username: user.username}}}).exec()
+	]);
 };
 
 guildSchema.methods.clearInterestedPlayers = function () {
@@ -140,7 +140,7 @@ function setSteamInfo(user) {
 	};
 }
 
-module.exports.userInfo = mongoose.model('userInfo', userInfoSchema);
+module.exports.UserInfo = mongoose.model('userInfo', userInfoSchema);
 
 // Initialize a connection to the Mongo database and return a promise that resolves after the connection opens.
 module.exports.init = async () => {

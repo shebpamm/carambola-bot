@@ -3,21 +3,22 @@ const dathost = require(path.join(__basedir, '/utils/dathost.js'));
 const linking = require(path.join(__basedir, '/utils/link.js'));
 
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
-	let guild = commandContext.guild;
+	const guild = commandContext.guild;
 
 	guild.notLinkedPlayers = [];
-	for (player of guild.pugPlayers) {
+	for (const player of guild.pugPlayers) {
 		await linking.getUserInfoDocument(guild.client.mongo, player).then(async userInfoDocument => {
-			if ( !linking.isUserLinked(userInfoDocument) ) {
+			if (!linking.isUserLinked(userInfoDocument)) {
 				guild.notLinkedPlayers.push(player);
 			}
-		})
+		});
 	}
-	if(guild.notLinkedPlayers.length !== 0) {
+
+	if (guild.notLinkedPlayers.length > 0) {
 		guild.pugChannel.send(`Players ${guild.notLinkedPlayers.join(' ')} still haven't linked.`);
 	} else {
 		const matchIP = await dathost.newMatch(guild, guildDocument);
-		guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\``)
+		guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\``);
 	}
 };
 

@@ -26,50 +26,72 @@ const cleanableProperties = [
 	'mapCollectorListener',
 	'mapCollector',
 	'selectedMap'
-]
+];
 
 const clearActiveRoles = async (guild, players, activeRoleID) => {
-	players.map(usr => {
-		guild.members.resolve(usr.id).roles.remove(activeRoleID)
-	})
-}
+	players.map(usr => guild.members.resolve(usr.id).roles.remove(activeRoleID));
+};
 
-const endEmbeds = (guild) => {
-	if(guild.pugQueryMessage) endEmbed(guild.pugQueryMessage);
-	if(guild.teamPickEmbed) endEmbed(guild.teamPickEmbed);
-	if(guild.mapEmbed) endEmbed(guild.mapEmbed);
-}
+const endEmbeds = guild => {
+	if (guild.pugQueryMessage) {
+		endEmbed(guild.pugQueryMessage);
+	}
 
-const endEmbed = (embed) => {
+	if (guild.teamPickEmbed) {
+		endEmbed(guild.teamPickEmbed);
+	}
+
+	if (guild.mapEmbed) {
+		endEmbed(guild.mapEmbed);
+	}
+};
+
+const endEmbed = embed => {
 	const finalEmbed = new Discord.MessageEmbed(embed.embeds[0]).setTitle('This query has ended.');
-	return embed.edit({ embeds: [finalEmbed]});
-}
+	return embed.edit({embeds: [finalEmbed]});
+};
 
-const stopCollectors = (guild) => {
-	if(guild.pugQueryReactionCollector) guild.pugQueryReactionCollector.stop();
-	if(guild.teamPickCollector) guild.teamPickCollector.stop();
-	if(guild.mapCollector) guild.mapCollector.stop();
-}
+const stopCollectors = guild => {
+	if (guild.pugQueryReactionCollector) {
+		guild.pugQueryReactionCollector.stop();
+	}
 
-const deleteVoiceChannels = (guild) => {
-	if(guild.pugLobbyChannel) guild.pugLobbyChannel.delete();
-	if(guild.teamOneVoice) guild.teamOneVoice.delete();
-	if(guild.teamTwoVoice) guild.teamTwoVoice.delete();
-}
+	if (guild.teamPickCollector) {
+		guild.teamPickCollector.stop();
+	}
 
+	if (guild.mapCollector) {
+		guild.mapCollector.stop();
+	}
+};
 
+const deleteVoiceChannels = guild => {
+	if (guild.pugLobbyChannel) {
+		guild.pugLobbyChannel.delete();
+	}
 
-const deleteProperties = (guild) => {
-	for (var prop of cleanableProperties) {
+	if (guild.teamOneVoice) {
+		guild.teamOneVoice.delete();
+	}
+
+	if (guild.teamTwoVoice) {
+		guild.teamTwoVoice.delete();
+	}
+};
+
+const deleteProperties = guild => {
+	for (const prop of cleanableProperties) {
 		delete guild[prop];
 	}
-}
+};
 
 const doCleanup = (guild, guildDocument) => {
 	clearActiveRoles(guild, guildDocument.pugs.pugQuery.interestedPlayers, guildDocument.config.pugs.pugActiveRoleID);
 	guildDocument.pugs.pugQuery.interestedPlayersCount = 0;
 	guildDocument.pugs.pugQuery.interestedPlayers = [];
-	Object.keys(guildDocument.pugs.pugStates).forEach(v => guildDocument.pugs.pugStates[v] = false); //Sets all pugStates to false
+	Object.keys(guildDocument.pugs.pugStates).forEach(v => {
+		guildDocument.pugs.pugStates[v] = false;
+	}); // Sets all pugStates to false
 	guildDocument.pugs.teams.one.players = [];
 	guildDocument.pugs.teams.two.players = [];
 
@@ -80,6 +102,6 @@ const doCleanup = (guild, guildDocument) => {
 
 	deleteVoiceChannels(guild);
 	deleteProperties(guild);
-}
+};
 
 module.exports.doCleanup = doCleanup;

@@ -1,4 +1,4 @@
-const pugStart = require('./pug-start.js');
+const pugStart = require('./pug-start');
 
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	client.removeListener('voiceStateUpdate', commandContext.guild.voiceStateListener);

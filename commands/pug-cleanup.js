@@ -3,27 +3,26 @@ const cleanup = require(path.join(__basedir, 'utils/cleanup'));
 const dathost = require(path.join(__basedir, 'utils/dathost'));
 
 function isPugActive(guildDocument) {
-	return  !Object.values(guildDocument.pugs.pugStates).slice(1).every(c => !c) //Slice because the mongo object contains the property $init
+	// Slice because the mongo object contains the property $init
+	return !Object.values(guildDocument.pugs.pugStates).slice(1).every(c => !c);
 }
 
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
-	if(guildDocument.pugs.pugStates.pugCaptainPickActive) {
+	if (guildDocument.pugs.pugStates.pugCaptainPickActive) {
 		commandContext.reply('Due to a bug, please first select two captains and then run this command again.');
-		return
+		return;
 	}
 
 	if (isPugActive(guildDocument)) {
 		if (!commandContext.pugQueryAuthor ||
 			commandContext.author.id === commandContext.guild.pugQueryAuthor.id ||
-	  	args.get('force')?.value) {
-
+			args.get('force')?.value) {
 			if (guildDocument.pugs.pugStates.pugGameActive) {
 				dathost.stopServer();
 			}
 
 			cleanup.doCleanup(commandContext.guild, guildDocument);
 			commandContext.reply('Pug ended and cleaned up.');
-
 		} else {
 			commandContext.reply(`You are not the pug author. Please ask ${commandContext.guild.pugQueryAuthor} to cancel it.`);
 		}
@@ -39,10 +38,10 @@ module.exports.config = {
 	categoryAliases: ['scrim', 'cs', 'csgo'],
 	commandAliases: ['cc', 'stop', 'clean', 'cancel', 'cls'],
 	slashEnabled: true,
-	slashOptions:[{
+	slashOptions: [{
 		name: 'force',
 		type: 'BOOLEAN',
 		description: 'Force-clean',
-		required: false,
+		required: false
 	}]
 };

@@ -2,20 +2,20 @@ const Discord = require('discord.js');
 
 global.__basedir = __dirname; // Points to root directory, so that modules can load config.json from anywhere.
 
-const eventLoader = require('./utils/eventLoader.js');
-const commandLoader = require('./utils/commandLoader.js');
-const mongo = require('./utils/mongo.js');
+const eventLoader = require('./utils/eventLoader');
+const commandLoader = require('./utils/commandLoader');
+const mongo = require('./utils/mongo');
 
 mongo.init();
 
 const client = new Discord.Client({
-  intents: [
-    Discord.Intents.FLAGS.GUILDS,
-    Discord.Intents.FLAGS.GUILD_MESSAGES,
-    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-    Discord.Intents.FLAGS.GUILD_VOICE_STATES,
-  ],
-  allowedMentions: { parse: ['users', 'roles'] }
+	intents: [
+		Discord.Intents.FLAGS.GUILDS,
+		Discord.Intents.FLAGS.GUILD_MESSAGES,
+		Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		Discord.Intents.FLAGS.GUILD_VOICE_STATES
+	],
+	allowedMentions: {parse: ['users', 'roles']}
 });
 const config = require('./config.json');
 
@@ -24,10 +24,8 @@ client.mongo = mongo;
 client.login(config.botUserToken);
 
 client.once('ready', () => {
-
-  eventLoader(client, mongo); // Fetch all eventHandlers in events/ folder.
-  commandLoader(client); // Fetch all commandHandlers in events/ folder.
-
-})
+	eventLoader(client, mongo); // Fetch all eventHandlers in events/ folder.
+	commandLoader(client); // Fetch all commandHandlers in events/ folder.
+});
 
 client.setMaxListeners(5); // Get a warning if there are more than 1 listeners on events at any time.

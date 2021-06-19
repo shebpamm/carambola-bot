@@ -1,7 +1,6 @@
 module.exports.execute = async (client, commandContext, args, guildDocument) => {
 	if (args.length === 0) {
 		commandContext.channel.send('//TODO'); // TODO: Add a help print after you have implemented the help printing lol
-
 	} else if (args.length === 1) { // Print out the current value
 		if (['role', 'mention'].includes(args[0])) { // Check if args[0] is either role or mention
 			const currentRole = await commandContext.guild.roles.fetch(guildDocument.config.stealth.hiddenVoiceRoleID || ''); // Try to resolve the RoleId found in db.
@@ -44,6 +43,7 @@ module.exports.execute = async (client, commandContext, args, guildDocument) => 
 			}
 		}
 	}
+
 	commandContext.delete();
 };
 

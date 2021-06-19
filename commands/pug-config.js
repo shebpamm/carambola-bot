@@ -1,4 +1,4 @@
-module.exports.execute = async (client, commandContext, args, guildDocument) => {
+module.exports.execute = async function (client, commandContext, args, guildDocument) {
 	if (args.length === 0) {
 		commandContext.channel.send('//TODO'); // TODO: Add a help print after you have implemented the help printing lol
 	} else if (args.length === 1) { // Print out the current value
@@ -33,14 +33,13 @@ module.exports.execute = async (client, commandContext, args, guildDocument) => 
 			}
 		}
 
-		if(args[0] == "pingOnQuery") {
-			commandContext.channel.send(`Pinging on query is currently set to **${guildDocument.config.pugs.pugPingOnQuery}**`)
+		if (args[0] === 'pingOnQuery') {
+			commandContext.channel.send(`Pinging on query is currently set to **${guildDocument.config.pugs.pugPingOnQuery}**`);
 		}
 
-		if(args[0] == "useActiveRole") {
-			commandContext.channel.send(`Active role assigning is currently set to **${guildDocument.config.pugs.useActiveRole}**`)
+		if (args[0] === 'useActiveRole') {
+			commandContext.channel.send(`Active role assigning is currently set to **${guildDocument.config.pugs.useActiveRole}**`);
 		}
-
 	} else if (args.length === 2) { // Set a new value
 		if (['role', 'mention'].includes(args[0])) {
 			if (commandContext.mentions.roles.size === 1) { // Check that the message contains exactly one role mention.
@@ -70,36 +69,36 @@ module.exports.execute = async (client, commandContext, args, guildDocument) => 
 			}
 		}
 
-		if(args[0] == "pingOnQuery") {
-			if(args[1].toLowerCase() == "false") {
+		if (args[0] === 'pingOnQuery') {
+			if (args[1].toLowerCase() === 'false') {
 				guildDocument.config.pugs.pugPingOnQuery = false;
 				guildDocument.save();
-				return commandContext.channel.send("Option changed successfully.")
+				return commandContext.channel.send('Option changed successfully.');
 			}
-			if(args[1].toLowerCase() == "true") {
+
+			if (args[1].toLowerCase() === 'true') {
 				guildDocument.config.pugs.pugPingOnQuery = true;
 				guildDocument.save();
-				return commandContext.channel.send("Option changed successfully.")
+				return commandContext.channel.send('Option changed successfully.');
 			}
 
-			return commandContext.channel.send("Incorrect value.")
-
+			return commandContext.channel.send('Incorrect value.');
 		}
 
-		if(args[0] == "useActiveRole") {
-			if(args[1].toLowerCase() == "false") {
+		if (args[0] === 'useActiveRole') {
+			if (args[1].toLowerCase() === 'false') {
 				guildDocument.config.pugs.useActiveRole = false;
 				guildDocument.save();
-				return commandContext.channel.send("Option changed successfully.")
+				return commandContext.channel.send('Option changed successfully.');
 			}
-			if(args[1].toLowerCase() == "true") {
+
+			if (args[1].toLowerCase() === 'true') {
 				guildDocument.config.pugs.useActiveRole = true;
 				guildDocument.save();
-				return commandContext.channel.send("Option changed successfully.")
+				return commandContext.channel.send('Option changed successfully.');
 			}
 
-			return commandContext.channel.send("Incorrect value.")
-
+			return commandContext.channel.send('Incorrect value.');
 		}
 	}
 };

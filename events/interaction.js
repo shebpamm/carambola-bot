@@ -1,19 +1,21 @@
 const Discord = require('discord.js');
-const commandHandler = require('../utils/commandHandler.js');
+const commandHandler = require('../utils/commandHandler');
 
 module.exports = async (client, mongo, interaction) => {
-  if (!interaction.isCommand()) return;
-  if (!interaction.guildID) return;
+	if (!interaction.isCommand()) {
+		return;
+	}
 
-  let guildDocument = await mongo.Guild.findOne({guildID: interaction.guildID});
-  let arguments = interaction.options.first().options || new Discord.Collection()
+	if (!interaction.guildID) {
+		return;
+	}
 
-  console.log(arguments)
+	const guildDocument = await mongo.Guild.findOne({guildID: interaction.guildID});
+	const args = interaction.options.first().options || new Discord.Collection();
 
-  command = client.categories[interaction.commandName].commands.get(interaction.options.first().name)
+	const command = client.categories[interaction.commandName].commands.get(interaction.options.first().name);
 
-  interaction.author = interaction.user //Yeah, it's ugly.
+	interaction.author = interaction.user; // Yeah, it's ugly.
 
-  commandHandler.handleCommand(command, client, interaction, arguments, guildDocument)
-
-}
+	commandHandler.handleCommand(command, client, interaction, args, guildDocument);
+};

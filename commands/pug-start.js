@@ -25,13 +25,12 @@ const onVoiceStateUpdate = (guild, guildDocument, oldState, newState) => {
 };
 
 const capFilter = response => {
-	try { //This try is here because if someone were to run cleanup while the awaitMessages is waiting, it crashes the whole bot.
+	try { // This try is here because if someone were to run cleanup while the awaitMessages is waiting, it crashes the whole bot.
 		return response.mentions.users.size === 2 && response.author.id === response.guild.pugQueryAuthor.id;
-	} catch (error) {
-		console.log("Someone probably went and cleaned while picking captain");
+	} catch {
+		console.log('Someone probably went and cleaned while picking captain');
 		return false;
 	}
-
 };
 
 const areMentionsTeamless = message => {
@@ -60,7 +59,7 @@ const startCaptainSelect = async (guild, guildDocument) => {
 
 	await guildDocument.clearTeams();
 
-	guildDocument.save()
+	guildDocument.save();
 
 	guild.pugChannel.send(`${guild.pugQueryAuthor} please mention two players to select as captains.`);
 	guild.pugChannel.awaitMessages(capFilter, {max: 1}).then(c => {
@@ -202,19 +201,19 @@ const updateMapEmbed = async (guild, guildDocument, commandContext) => {
 		await guildDocument.save();
 
 		guild.notLinkedPlayers = [];
-		for (player of guild.pugPlayers) {
+		for (const player of guild.pugPlayers) {
 			await linking.getUserInfoDocument(guild.client.mongo, player).then(async userInfoDocument => {
-				if ( !linking.isUserLinked(userInfoDocument) ) {
+				if (!linking.isUserLinked(userInfoDocument)) {
 					guild.notLinkedPlayers.push(player);
 				}
-			})
+			});
 		}
 
-		if(guild.notLinkedPlayers.length !== 0) {
+		if (guild.notLinkedPlayers.length > 0) {
 			guild.pugChannel.send(`Players ${guild.notLinkedPlayers.join(' ')} have not yet linked their steam. Please type \`pug resume\` when everyone is linked.`);
 		} else {
 			const matchIP = await dathost.newMatch(guild, guildDocument);
-			guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\`\n**Or open:** <steam://${matchIP}>`)
+			guild.pugChannel.send(`Server started.\n**Type into console:** \`connect ${matchIP};\`\n**Or open:** <steam://${matchIP}>`);
 		}
 	}
 
@@ -360,23 +359,26 @@ module.exports.execute = async (client, commandContext, args, guildDocument) => 
 			commandContext.guild.missingPlayers = commandContext.guild.pugPlayers.filter(p => !commandContext.guild.movedPugPlayers.map(c => c.id).includes(p.id));
 
 			commandContext.guild.cannotContactPlayers = [];
-			for (player of commandContext.guild.pugPlayers) {
+			for (const player of commandContext.guild.pugPlayers) {
 				await linking.getUserInfoDocument(commandContext.client.mongo, player).then(async userInfoDocument => {
-					if ( !linking.isUserLinked(userInfoDocument) ) {
-						if(!userInfoDocument) {
+					if (!linking.isUserLinked(userInfoDocument)) {
+						if (!userInfoDocument) {
 							userInfoDocument = await linking.createUserInfoDocument(commandContext.client.mongo, player);
 						}
+
 						return player.send(`Hi there! Looks like you're attending a pug but haven't linked your steam yet.
 Please log into steam here: <${linking.getUserLinkingUrl(userInfoDocument)}>`).catch(error => {
-							if(error.code === 50007) commandContext.guild.cannotContactPlayers.push(player)
-							//console.log(message.guild.cannotContactPlayers)
-						})
+							if (error.code === 50007) {
+								commandContext.guild.cannotContactPlayers.push(player);
+							}
+							// Console.log(message.guild.cannotContactPlayers)
+						});
 					}
-				})
+				});
 			}
 
 			console.log(commandContext.guild.cannotContactPlayers);
-			if(commandContext.guild.cannotContactPlayers.length !== 0) {
+			if (commandContext.guild.cannotContactPlayers.length > 0) {
 				pugChannel.send(`Could not DM the following players: ${commandContext.guild.cannotContactPlayers.join(' ')}
 Please check your Privacy & Safety settings.`);
 			}
@@ -408,10 +410,10 @@ module.exports.config = {
 	categoryAliases: ['scrim', 'cs', 'csgo'],
 	commandAliases: ['s', 'begin'],
 	slashEnabled: true,
-	slashOptions:[{
+	slashOptions: [{
 		name: 'force',
 		type: 'BOOLEAN',
 		description: 'Force-start',
-		required: false,
+		required: false
 	}]
 };

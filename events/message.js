@@ -1,7 +1,44 @@
 const path = require('path');
 const config = require(path.join(__basedir, 'config.json'));
-const commandHandler = require('../utils/commandHandler.js');
-const Discord = require('discord.js')
+const commandHandler = require('../utils/commandHandler');
+const Discord = require('discord.js');
+
+function convertArguments(resolvedCommand, message, rawArgs) {
+	const userIter = message.mentions.users.array()[Symbol.iterator]();
+	const roleIter = message.mentions.roles.array()[Symbol.iterator]();
+	const channelIter = message.mentions.channels.array()[Symbol.iterator]();
+
+	return new Discord.Collection(resolvedCommand.config.slashOptions.map((arg, i) => {
+		const optionData = {name: arg.name, type: arg.type};
+		if (arg.type === 'INTEGER') {
+			optionData.value = Number.parseInt(rawArgs[i], 10);
+		}
+
+		if (arg.type === 'BOOLEAN') {
+			optionData.value = (rawArgs[i]?.toLowerCase() === 'true');
+		}
+
+		if (arg.type === 'USER') {
+			const user = userIter.next().value;
+			optionData.value = user?.id;
+			optionData.user = user;
+		}
+
+		if (arg.type === 'ROLE') {
+			const role = roleIter.next().value;
+			optionData.value = role?.id;
+			optionData.role = role;
+		}
+
+		if (arg.type === 'CHANNEL') {
+			const channel = channelIter.next().value;
+			optionData.value = channel?.id;
+			optionData.channel = channel;
+		}
+
+		return [arg.name, optionData];
+	}));
+}
 
 module.exports = async (client, mongo, message) => {
 	if (message.author.bot) { // If message author is a bot, ignore.
@@ -25,20 +62,14 @@ module.exports = async (client, mongo, message) => {
 		guildDocument = document;
 	}
 
-	const usedPrefix = guildDocument.config.usedPrefix
-
-	let isPrefixed;
+	const usedPrefix = guildDocument.config.usedPrefix;
 
 	// Use different methods to compare depending if config has prefixCaseSensitive set or not.
-	if (config.prefixCaseSensitive || false) {
-		isPrefixed = message.content.trim().startsWith(usedPrefix);
-	} else {
-		isPrefixed = message.content.trim().toLowerCase().startsWith(usedPrefix.toLowerCase());
-	}
+	const isPrefixed = config.prefixCaseSensitive || false ? message.content.trim().startsWith(usedPrefix) : message.content.trim().toLowerCase().startsWith(usedPrefix.toLowerCase());
 
 	// Check if message contains wanted command prefix
 	if (isPrefixed) {
-		const [catg, cmd, ...rawArgs] = message.content.trim().slice(usedPrefix.length).trim().match(/(?:[^\s"]+|"[^"]*")+/g).map(a => a.replace(/^"(.+(?="$))"$/, '$1'))
+		const [catg, cmd, ...rawArgs] = message.content.trim().slice(usedPrefix.length).trim().match(/(?:[^\s"]+|"[^"]*")+/g).map(a => a.replace(/^"(.+(?="$))"$/, '$1'));
 
 		// Check if category is valid:
 		const resolvedCatg = client.categories[catg] || client.categories[client.categoryAliases.get(catg)];
@@ -49,50 +80,17 @@ module.exports = async (client, mongo, message) => {
 
 			if (resolvedCommand) { // Found a command
 				// Check if command is case sensitive, and if so return if it doesn't match.
-				if (resolvedCommand.config.case_sensitive || false) {
-					if (!(cmd in [resolvedCommand.config.name, ...resolvedCommand.config.commandAliases])) {
-						return;
-					}
+				if (resolvedCommand.config.case_sensitive && !(cmd in [resolvedCommand.config.name, ...resolvedCommand.config.commandAliases])) {
+					return;
 				}
 
-				let arguments = rawArgs;
-				if(resolvedCommand.config.slashEnabled && !!resolvedCommand.config.slashOptions) {
-
-					const userIter = message.mentions.users.array()[Symbol.iterator]()
-					const roleIter = message.mentions.roles.array()[Symbol.iterator]()
-					const channelIter = message.mentions.channels.array()[Symbol.iterator]()
-
-					arguments = new Discord.Collection(resolvedCommand.config.slashOptions.map((arg, i) => {
-
-						const optionData = { name: arg.name, type: arg.type}
-
-						let value = rawArgs[i]
-						if(arg.type === 'INTEGER') value = Number.parseInt(rawArgs[i])
-						if(arg.type === 'BOOLEAN') value = (rawArgs[i]?.toLowerCase() === 'true')
-						if(arg.type === 'USER') {
-							const user = userIter.next().value
-							optionData.value = user?.id
-							optionData.user = user
-						}
-						if(arg.type === 'ROLE') {
-							const role = roleIter.next().value
-							optionData.value = role?.id
-							optionData.role = role
-						}
-						if(arg.type === 'CHANNEL') {
-							const channel = channelIter.next().value
-							optionData.value = channel?.id
-							optionData.channel = channel
-						}
-
-
-						return [arg.name, optionData]
-					}))
+				let args = rawArgs;
+				if (resolvedCommand.config.slashEnabled && Boolean(resolvedCommand.config.slashOptions)) {
+					args = convertArguments(resolvedCommand, message, rawArgs);
 				}
 
-				//handle rest of command checking here, when message specific parsing has been done.
-				commandHandler.handleCommand(resolvedCommand, client, message, arguments, guildDocument)
-
+				// Handle rest of command checking here, when message specific parsing has been done.
+				commandHandler.handleCommand(resolvedCommand, client, message, args, guildDocument);
 			} // Else console.log("Unknown command")
 		} // Else console.log(`Unknown category: ${resolvedCatg} from ${catg} in ${client.categories}`);
 	}

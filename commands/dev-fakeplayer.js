@@ -4,7 +4,7 @@ module.exports.execute = async (client, commandContext, args, guildDocument) => 
 			return {id: user.id, username: user.username};
 		});
 		for (const player of players) {
-			await guildDocument.addInterestedPlayer(player);
+			guildDocument.addInterestedPlayer(player);
 		}
 	}
 };
