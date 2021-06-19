@@ -7,7 +7,7 @@ module.exports.handleCommand = (resolvedCommand, client, commandContext, args, g
     if (!commandContext.member.hasPermission('ADMINISTRATOR')) { //If user has the ADMINISTRATOR permission, skip permission checks.
       if (resolvedCommand.config.permissions.includes('admin')) {
         if (!commandContext.member.roles.cache.has(guildDocument.config.admin.adminRoleID)) {
-          commandContext.channel.send("You don't have permissions to run this command.");
+          commandContext.reply("You don't have permissions to run this command.");
           return;
         }
       }
@@ -16,7 +16,8 @@ module.exports.handleCommand = (resolvedCommand, client, commandContext, args, g
 
   // Check if command is a dev command, and deny it if the author is not a Developer.
   if (resolvedCommand.config.category === 'developer') {
-    if (commandContext.author.id !== config.developerID) {
+    if ((commandContext.author?.id || commandContext.user?.id) !== config.developerID) {
+      commandContext.reply({ content: "This is a developer-only command.", ephemeral: true })
       return;
     }
   }
