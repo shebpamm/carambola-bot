@@ -1,9 +1,9 @@
 module.exports.execute = async (client, message, args, guildDocument) => {
 	if(guildDocument.pugs.pugStates.pugQueryActive) {
 		message.guild.pugQueryAuthor = message.author
-		message.channel.send("You are now the author of this query.");
+		message.reply(`${message.author} is now the author of this query.`);
 	} else {
-		message.channel.send("No query active.");
+		message.reply("No query active.");
 	}
 };
 
