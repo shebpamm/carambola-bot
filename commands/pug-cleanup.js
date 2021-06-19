@@ -8,32 +8,41 @@ function isPugActive(guildDocument) {
 
 module.exports.execute = async (client, message, args, guildDocument) => {
 	if(guildDocument.pugs.pugStates.pugCaptainPickActive) {
-		message.channel.send('Due to a bug, please first select two captains and then run this command again.');
+		message.reply('Due to a bug, please first select two captains and then run this command again.');
 		return
 	}
 
 	if (isPugActive(guildDocument)) {
-		if (!message.pugQueryAuthor || message.author.id === message.guild.pugQueryAuthor.id ||
-			 (args.length === 1 && args[0] === 'force')) {
+		if (!message.pugQueryAuthor ||
+			message.author.id === message.guild.pugQueryAuthor.id ||
+	  	args.get('force')?.value) {
 
 			if (guildDocument.pugs.pugStates.pugGameActive) {
 				dathost.stopServer();
 			}
 
 			cleanup.doCleanup(message.guild, guildDocument);
-			message.channel.send('Pug ended and cleaned up.');
+			message.reply('Pug ended and cleaned up.');
 
 		} else {
-			message.channel.send(`You are not the pug author. Please ask ${message.guild.pugQueryAuthor} to cancel it.`);
+			message.reply(`You are not the pug author. Please ask ${message.guild.pugQueryAuthor} to cancel it.`);
 		}
 	} else {
-		message.channel.send('No game active. Nothing done.');
+		message.reply('No game active. Nothing done.');
 	}
 };
 
 module.exports.config = {
-	name: 'cancel',
+	name: 'cleanup',
 	category: 'pug',
+	description: 'Clears and resets any ongoing games.',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['cc', 'stop', 'clean', 'cleanup', 'cls']
+	commandAliases: ['cc', 'stop', 'clean', 'cancel', 'cls'],
+	slashEnabled: true,
+	slashOptions:[{
+		name: 'force',
+		type: 'BOOLEAN',
+		description: 'Force-clean',
+		required: false,
+	}]
 };
