@@ -57,12 +57,36 @@ module.exports = async (client, mongo, message) => {
 
 				let arguments = rawArgs;
 				if(resolvedCommand.config.slashEnabled && !!resolvedCommand.config.slashOptions) {
+
+					const userIter = message.mentions.users.array()[Symbol.iterator]()
+					const roleIter = message.mentions.roles.array()[Symbol.iterator]()
+					const channelIter = message.mentions.channels.array()[Symbol.iterator]()
+
 					arguments = new Discord.Collection(resolvedCommand.config.slashOptions.map((arg, i) => {
+
+						const optionData = { name: arg.name, type: arg.type}
+
 						let value = rawArgs[i]
 						if(arg.type === 'INTEGER') value = Number.parseInt(rawArgs[i])
-						if(arg.type === 'BOOLEAN') value = (rawArgs[i].toLowerCase() === 'true')
+						if(arg.type === 'BOOLEAN') value = (rawArgs[i]?.toLowerCase() === 'true')
+						if(arg.type === 'USER') {
+							const user = userIter.next().value
+							optionData.value = user?.id
+							optionData.user = user
+						}
+						if(arg.type === 'ROLE') {
+							const role = roleIter.next().value
+							optionData.value = role?.id
+							optionData.role = role
+						}
+						if(arg.type === 'CHANNEL') {
+							const channel = channelIter.next().value
+							optionData.value = channel?.id
+							optionData.channel = channel
+						}
 
-						return [arg.name, { name: arg.name, value, type: arg.type}]
+
+						return [arg.name, optionData]
 					}))
 				}
 
