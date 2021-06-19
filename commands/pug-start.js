@@ -152,7 +152,7 @@ const createMapEmbed = (guild, guildDocument) => {
 		]
 	};
 
-	return guild.pugChannel.send({embed: mapEmbedTemplate});
+	return guild.pugChannel.send({embeds: [mapEmbedTemplate]});
 };
 
 const updateMapEmbed = async (guild, guildDocument, message) => {
@@ -218,7 +218,7 @@ const updateMapEmbed = async (guild, guildDocument, message) => {
 		}
 	}
 
-	return guild.mapEmbed.edit({embed: queryEmbedTemplate});
+	return guild.mapEmbed.edit({embeds: [queryEmbedTemplate]});
 };
 
 module.exports.startMapVeto = startMapVeto;
@@ -268,7 +268,7 @@ const updateTeamPickEmbed = (guild, guildDocument, message) => {
 		});
 	}
 
-	return guild.teamPickEmbed.edit({embed: queryEmbedTemplate});
+	return guild.teamPickEmbed.edit({embeds: [queryEmbedTemplate]});
 };
 
 const createTeamPickEmbed = (guild, guildDocument) => {
@@ -295,7 +295,7 @@ const createTeamPickEmbed = (guild, guildDocument) => {
 		]
 	};
 
-	return guild.pugChannel.send({embed: queryEmbedTemplate});
+	return guild.pugChannel.send({embeds: [queryEmbedTemplate]});
 };
 
 const getTeamlessPlayers = (guild, guildDocument) => {

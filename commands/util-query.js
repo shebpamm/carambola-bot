@@ -11,7 +11,7 @@ const createQueryMessageEmbed = async (message, description, maxSigns = 99) => {
 			}
 		]
 	};
-	return message.channel.send({embed: queryEmbed});
+	return message.channel.send({embeds: [queryEmbed]});
 };
 
 const updateQueryMessageEmbed = async (embedMessage, queryObject) => {
@@ -39,12 +39,12 @@ const updateQueryMessageEmbed = async (embedMessage, queryObject) => {
 	const queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
 	// QueryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
 
-	return embedMessage.edit(queryEmbed);
+	return embedMessage.edit({ embeds: [queryEmbed]});
 };
 
 const endQueryMessageEmbed = (embed) => {
 	const finalEmbed = new Discord.MessageEmbed(embed.embeds[0]).setTitle('This query has ended.');
-	return embed.edit(finalEmbed);
+	return embed.edit({ embeds: [finalEmbed]});
 }
 
 const reactionCollectorFilter = (reaction, user) => {

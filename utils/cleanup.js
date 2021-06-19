@@ -42,7 +42,7 @@ const endEmbeds = (guild) => {
 
 const endEmbed = (embed) => {
 	const finalEmbed = new Discord.MessageEmbed(embed.embeds[0]).setTitle('This query has ended.');
-	return embed.edit(finalEmbed);
+	return embed.edit({ embeds: [finalEmbed]});
 }
 
 const stopCollectors = (guild) => {

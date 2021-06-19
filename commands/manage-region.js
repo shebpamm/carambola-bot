@@ -22,7 +22,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 				]
 			};
 
-			message.channel.send({embed: regionEmbed});
+			message.channel.send({embeds: [regionEmbed]});
 		});
 	} else {
 		message.guild.fetchVoiceRegions().then(regions => {

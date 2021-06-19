@@ -9,17 +9,17 @@ const isConfigured = (guildDocument, message) => { // Check if proper roles and 
 const createPugQueryMessageEmbed = async (message, guildDocument) => {
 	const pugRole = await message.guild.roles.fetch(guildDocument.config.pugs.pugUserRoleID || '');
 	const pugChannel = await message.guild.channels.resolve(guildDocument.config.pugs.pugChannelID);
-	const queryEmbed = {
-		color: 0xFFCA26,
-		title: `${message.guild.pugQueryAuthor.username} is interested in doing a 5v5!`,
-		description: `If you're interested, react with :thumbsup: below!`,
-		fields: [
-			{
-				name: 'Player count:', value: '0/10'
-			}
-		]
-	};
-	return pugChannel.send((guildDocument.config.pugs.pugPingOnQuery ? pugRole : ""), {embed: queryEmbed});
+	const queryEmbed = new Discord.MessageEmbed()
+		.setColor(0xFFCA26)
+		.setTitle(`${message.guild.pugQueryAuthor.username} is interested in doing a 5v5!`)
+		.setDescription(`If you're interested, react with :thumbsup: below!`)
+		.addFields(
+			{ name: 'Player count:', value: '0/10' }
+		);
+	return pugChannel.send({
+		...(guildDocument.config.pugs.pugPingOnQuery) && {content: `${pugRole}`},
+		embeds: [queryEmbed]
+	});
 };
 
 const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
@@ -48,7 +48,7 @@ const updatePugQueryMessageEmbed = async (embedMessage, guildDocument) => {
 	const queryEmbed = new Discord.MessageEmbed(queryEmbedTemplate);
 	// QueryEmbed.addFields(...guildDocument.pugs.pugQuery.interestedPlayers.map(p => {return { name : p.username, value : '\u200b', inline : true }}))
 
-	return embedMessage.edit(queryEmbed);
+	return embedMessage.edit({ embeds: [queryEmbed] });
 };
 
 const reactionCollectorFilter = (reaction, user) => {
