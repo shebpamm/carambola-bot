@@ -329,7 +329,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 		message.guild.pugChannel = pugChannel;
 		message.guild.movedPugPlayers = [];
 
-		if (guildDocument.pugs.pugQuery.interestedPlayersCount >= guildDocument.pugs.pugQuery.targetPlayerCount || args.includes('force')) {
+		if (guildDocument.pugs.pugQuery.interestedPlayersCount >= guildDocument.pugs.pugQuery.targetPlayerCount || args.get('force')?.value) {
 			// Pug querying is now stopped as the next stage starts.
 			guildDocument.pugs.pugStates.pugQueryActive = false;
 			guildDocument.pugs.pugStates.pugLobbyJoinActive = true;
@@ -367,7 +367,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 							userInfoDocument = await linking.createUserInfoDocument(message.client.mongo, player);
 						}
 						return player.send(`Hi there! Looks like you're attending a pug but haven't linked your steam yet.
-						Please log into steam here: <${linking.getUserLinkingUrl(userInfoDocument)}>`).catch(error => {
+Please log into steam here: <${linking.getUserLinkingUrl(userInfoDocument)}>`).catch(error => {
 							if(error.code === 50007) message.guild.cannotContactPlayers.push(player)
 							//console.log(message.guild.cannotContactPlayers)
 						})
@@ -394,16 +394,24 @@ Please check your Privacy & Safety settings.`);
 			}
 			// Command execution ends here, game flow continues after voiceState marks everyone on the lobby or a new command with force is issued.
 		} else {
-			message.channel.send(`Not enough participants. ${guildDocument.pugs.pugQuery.interestedPlayersCount}/${guildDocument.pugs.pugQuery.targetPlayerCount}`);
+			message.reply(`Not enough participants. ${guildDocument.pugs.pugQuery.interestedPlayersCount}/${guildDocument.pugs.pugQuery.targetPlayerCount}`);
 		}
 	} else {
-		message.channel.send('No pug active. Start a query with `pug query new`');
+		message.reply('No pug active. Start a query with `pug query new`');
 	}
 };
 
 module.exports.config = {
 	name: 'start',
 	category: 'pug',
+	description: 'Starts a new pick-up game',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['s', 'begin']
+	commandAliases: ['s', 'begin'],
+	slashEnabled: true,
+	slashOptions:[{
+		name: 'force',
+		type: 'BOOLEAN',
+		description: 'Force-start',
+		required: false,
+	}]
 };

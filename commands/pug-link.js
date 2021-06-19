@@ -8,11 +8,11 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 	client.mongo.userInfo.findOne({discordID: message.author.id}).then(userInfoDocument => {
 		if (userInfoDocument) {
 			if (userInfoDocument.steam && userInfoDocument.steam.steamID) {
-				message.channel.send('Your account is already linked.');
+				message.reply('Your account is already linked.');
 				return;
 			}
 
-			message.author.send(`Please log into steam here: <http://${config.authUrl}/${shortenedID}>`);
+			message.reply({ content: `Please log into steam here: <http://${config.authUrl}/${shortenedID}>`, ephemeral: true });
 			return;
 		}
 
@@ -22,7 +22,7 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 			discordTag: message.author.tag
 		});
 		newUserDoc.save().then(() => {
-			message.author.send(`Please log into steam here: <http://${config.authUrl}/${shortenedID}>`);
+			message.reply({ content: `Please log into steam here: <http://${config.authUrl}/${shortenedID}>`, ephemeral: true });
 		});
 	}).catch(error => {
 		console.log(error);
@@ -32,6 +32,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'link',
 	category: 'pug',
+	description: 'Link your steam with Carambola',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['li', 'connect']
+	commandAliases: ['li', 'connect'],
+	slashEnabled: true
 };

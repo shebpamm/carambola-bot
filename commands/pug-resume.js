@@ -24,6 +24,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'resume',
 	category: 'pug',
+	description: 'Resumes an ongoing pick-up game',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['res', 'continue']
+	commandAliases: ['res', 'continue'],
+	slashEnabled: true
 };

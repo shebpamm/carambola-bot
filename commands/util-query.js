@@ -83,54 +83,68 @@ const removeInterestedPlayer = (queryObject, user) => {
 };
 
 module.exports.execute = async (client, message, args, guildDocument) => {
-	if (args.length === 0) {
+	if (!args.get('title')?.value) {
 		if(message.author.queries && Object.keys(message.author.queries).length > 0) {
-			message.channel.send(`You have ${Object.keys(message.author.queries).length} queries active. They cancel after a day.`);
+			message.reply(`You have ${Object.keys(message.author.queries).length} queries active. They cancel after a day.`);
 		} else {
-			message.channel.send("You have no queries active. Queries last for a day.");
+			message.reply("You have no queries active. Queries last for a day.");
 		}
 		return
 	}
 
-	if (args[0].length > 256) {
-		message.channel.send("Too long title. Max length by discord is 256 characters.");
+	if (args.get('title').value.length > 256) {
+		message.reply("Too long title. Max length by discord is 256 characters.");
 		return;
 	}
 
-	if (args.length === 1) {
+	if (!args.get('players')?.value) {
 		maxSigns = 99;
-	}
-	if (args.length === 2) {
-		parsedMax = Number.parseInt(args[1]);
+	} else {
+		parsedMax = Number.parseInt(args.get('players').value);
 		if (Number.isNaN(parsedMax) || parsedMax > 100 || parsedMax < 1) maxSigns = 99
 		else maxSigns =  parsedMax
 	}
 
 
+	message.reply({ content: 'Creating query...', ephemeral: true }).then( res => {
+		createQueryMessageEmbed(message, args.get('title').value, maxSigns).then( queryMessage => {
+			queryMessage.react('👍').then(queryMessageReaction => {
+				// Create a reaction collector after the message has been sent.
+				const queryObject = {
+					'message' : queryMessage,
+					'title' : args.get('title').value,
+					'queryData' : {
+						'targetPlayerCount' : maxSigns,
+						'interestedPlayersCount' : 0,
+						'interestedPlayers' : []
+					}
+				};
+				message.author.queries = message.author.queries || {};
+				message.author.queries[queryMessage.id] = queryObject
 
-	createQueryMessageEmbed(message, args[0], maxSigns).then( queryMessage => {
-		queryMessage.react('👍').then(queryMessageReaction => {
-			// Create a reaction collector after the message has been sent.
-			const queryObject = {
-				'message' : queryMessage,
-				'title' : args[0],
-				'queryData' : {
-					'targetPlayerCount' : maxSigns,
-					'interestedPlayersCount' : 0,
-					'interestedPlayers' : []
-				}
-			};
-			message.author.queries = message.author.queries || {};
-			message.author.queries[queryMessage.id] = queryObject
-
-			queryObject.reactionCollector = createQueryReactionCollector(queryMessage, queryObject);
-		});
+				queryObject.reactionCollector = createQueryReactionCollector(queryMessage, queryObject);
+			});
+		})
 	})
 };
 
 module.exports.config = {
 	name: 'query',
 	category: 'utility',
+	description: 'Creates multi-purpose queries',
 	categoryAliases: ['util', 'misc'],
-	commandAliases: ['q']
+	commandAliases: ['q'],
+	slashEnabled: true,
+	slashOptions: [{
+		name: 'title',
+		type: 'STRING',
+		description: 'Title for the query',
+		required: true,
+	},
+	{
+		name: 'players',
+		type: 'INTEGER',
+		description: 'Max amount of participants',
+		required: false,
+	}]
 };

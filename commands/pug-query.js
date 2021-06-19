@@ -84,55 +84,38 @@ const createPugQueryReactionCollector = (queryMessage, guildDocument) => {
 };
 
 module.exports.execute = async (client, message, args, guildDocument) => {
-	if (args.length === 0) {
 		if (guildDocument.pugs.pugStates.pugQueryActive) {
-			message.channel.send(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
-		} else {
-			message.channel.send(`There isn't a query running right now.\n Start one with the command: \`${guildDocument.config.usedPrefix} pug query new\``);
+			message.reply(`There is a query running with ${guildDocument.pugs.pugQuery.interestedPlayersCount} interested players.`);
+			return
 		}
-	}
 
-	if (args.length === 1) {
-		if (['new', 'start', 'go'].includes(args[0])) {
-			if (guildDocument.pugs.pugStates.pugQueryActive) {
-				message.channel.send('There is already a pug query active.\nYou can cancel it with `pug query cancel`');
-			} else if (isConfigured(guildDocument, message)) { // Check if the bot has been given a proper channel to post in and a role to mention.
-				guildDocument.pugs.lastCreatedAt = undefined;
-				await guildDocument.clearInterestedPlayers();
+		if (isConfigured(guildDocument, message)) { // Check if the bot has been given a proper channel to post in and a role to mention.
+			guildDocument.pugs.lastCreatedAt = undefined;
+			await guildDocument.clearInterestedPlayers();
 
-				message.guild.pugQueryAuthor = message.author;
+			message.guild.pugQueryAuthor = message.author;
 
-				createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { // Create a new embed and send it.
-					message.guild.pugQueryMessage = queryMessage;
-					queryMessage.react('👍').then(queryMessageReaction => {
-						// Create a reaction collector after the message has been sent.
-						message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
-					});
+			createPugQueryMessageEmbed(message, guildDocument).then(queryMessage => { // Create a new embed and send it.
+				message.guild.pugQueryMessage = queryMessage;
+				queryMessage.react('👍').then(queryMessageReaction => {
+					// Create a reaction collector after the message has been sent.
+					message.guild.pugQueryReactionCollector = createPugQueryReactionCollector(queryMessage, guildDocument);
 				});
-				guildDocument.pugs.pugStates.pugQueryActive = true;
-				guildDocument.save();
-			} else {
-				message.channel.send(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
-			}
+			});
+			guildDocument.pugs.pugStates.pugQueryActive = true;
+			guildDocument.save();
+			message.reply({ content: 'Query created.', ephemeral: true })
+		} else {
+			message.reply(`Please give the bot all the roles required and a channel to post in:\`\`\`${guildDocument.config.usedPrefix} pug config role @<role>\n${guildDocument.config.usedPrefix} pug config channel #<channel>\`\`\``);
 		}
 
-		if (['cancel', 'cc'].includes(args[0])) {
-			if (guildDocument.pugs.pugStates.pugQueryActive) {
-				guildDocument.pugs.pugQuery.interestedPlayersCount = 0;
-				guildDocument.pugs.pugQuery.interestedPlayers = [];
-				guildDocument.pugs.pugStates.pugQueryActive = false;
-				guildDocument.save();
-				message.channel.send('Query cancelled.');
-			} else {
-				message.channel.send('No query active. Nothing done.');
-			}
-		}
-	}
 };
 
 module.exports.config = {
 	name: 'query',
 	category: 'pug',
+	description: 'Starts a new pick-up game query',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['q']
+	commandAliases: ['q'],
+	slashEnabled: true
 };

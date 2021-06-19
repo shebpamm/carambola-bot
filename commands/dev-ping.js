@@ -6,5 +6,7 @@ module.exports.config = {
 	name: 'ping',
 	category: 'developer',
 	categoryAliases: ['dev', 'd'],
-	commandAliases: ['p']
+	commandAliases: ['p'],
+	description: 'Just replies back to you.',
+	slashEnabled: true
 };

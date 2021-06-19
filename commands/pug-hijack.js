@@ -12,6 +12,8 @@ module.exports.execute = async (client, message, args, guildDocument) => {
 module.exports.config = {
 	name: 'hijack',
 	category: 'pug',
+	description: 'Make yourself the author of the current query!',
 	categoryAliases: ['scrim', 'cs', 'csgo'],
-	commandAliases: ['🤠', 'steal', 'own']
+	commandAliases: ['🤠', 'steal', 'own'],
+	slashEnabled: true
 };
