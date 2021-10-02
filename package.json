@@ -9,7 +9,7 @@
   "author": "shebpamm",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "discord.js": "github:discordjs/discord.js",
     "form-data": "^3.0.0",
     "mongoose": "^5.10.9",
