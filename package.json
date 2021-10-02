@@ -9,14 +9,14 @@
   "author": "shebpamm",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.2",
+    "axios": "^0.22.0",
     "discord.js": "github:discordjs/discord.js",
-    "form-data": "^3.0.0",
-    "mongoose": "^5.10.9",
+    "form-data": "^4.0.0",
+    "mongoose": "^6.0.8",
     "require-all": "^3.0.0"
   },
   "devDependencies": {
-    "xo": "^0.34.1"
+    "xo": "^0.45.0"
   },
   "xo": {
     "globals": [
